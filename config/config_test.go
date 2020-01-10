@@ -12,7 +12,7 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/clearmatics/ion/ion-cli/config"
+	"github.com/clearmatics/ion-cli/config"
 )
 
 func Test_ReadValidKeystore(t *testing.T) {

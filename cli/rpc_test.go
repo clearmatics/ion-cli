@@ -4,7 +4,6 @@ package cli
 import (
 	"encoding/hex"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"testing"
 
@@ -18,14 +17,13 @@ func Test_EncodeSignedBlock(t *testing.T) {
 
 	// read a fake block
 	raw, err := ioutil.ReadFile("./block.json")
-	if err != nil {
-		fmt.Println("cannot find test block.json file:", err)
-		return
-	}
+	assert.Nil(t, err)
 
 	// Marshall fake block into the Header
 	var blockHeader *types.Header
-	json.Unmarshal(raw, &blockHeader)
+	err = json.Unmarshal(raw, &blockHeader)
+	assert.Nil(t, err)
+
 	SignedBlock := encodeSignedBlock(blockHeader)
 
 	assert.Equal(t, ExpectedSignedBytes, SignedBlock)
@@ -37,14 +35,13 @@ func Test_EncodeUnsignedBlock(t *testing.T) {
 
 	// read a fake block
 	raw, err := ioutil.ReadFile("./block.json")
-	if err != nil {
-		fmt.Println("cannot find test block.json file:", err)
-		return
-	}
+	assert.Nil(t, err)
 
 	// Marshall fake block into the Header
 	var blockHeader *types.Header
-	json.Unmarshal(raw, &blockHeader)
+	err = json.Unmarshal(raw, &blockHeader)
+	assert.Nil(t, err)
+
 	UnsignedBlock := encodeUnsignedBlock(blockHeader)
 
 	assert.Equal(t, ExpectedUnsignedBytes, UnsignedBlock)

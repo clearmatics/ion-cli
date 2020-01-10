@@ -74,8 +74,8 @@ func (tx *rpcTransaction) UnmarshalJSON(msg []byte) error {
 // BlockNumberByTransactionHash gets a block number by a transaction hash in that block
 func BlockNumberByTransactionHash(ctx context.Context, c *rpc.Client, txHash common.Hash) (*string, *types.Transaction, error) {
 	var json *rpcTransaction
-	var err error
-	err = c.CallContext(ctx, &json, "eth_getTransactionByHash", txHash)
+
+	err := c.CallContext(ctx, &json, "eth_getTransactionByHash", txHash)
 	if err != nil {
 		return nil, nil, err
 	} else if json == nil {

@@ -8,13 +8,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/clearmatics/ion/ion-cli/config"
+	"github.com/clearmatics/ion-cli/config"
 )
 
 func Test_Read_ValidSetupJson(t *testing.T) {
 	path := findPath() + "./test.json"
-	setup := config.ReadSetup(path)
+	setup, err := config.ReadSetup(path)
 
+	assert.Nil(t, err)
 	assert.Equal(t, "http://127.0.0.1:8545", setup.AddrTo)
 	assert.Equal(t, "0x2be5ab0e43b6dc2908d5321cf318f35b80d0c10d", setup.AccountTo)
 	assert.Equal(t, "../poa-network/node1/keystore/UTC--2018-06-05T09-31-57.109288703Z--2be5ab0e43b6dc2908d5321cf318f35b80d0c10d", setup.KeystoreTo)

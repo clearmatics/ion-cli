@@ -15,8 +15,8 @@ import (
 
 	"github.com/abiosoft/ishell"
 
-	contract "github.com/clearmatics/ion/ion-cli/contracts"
-	"github.com/clearmatics/ion/ion-cli/utils"
+	contract "github.com/clearmatics/ion-cli/contracts"
+	"github.com/clearmatics/ion-cli/utils"
 )
 
 func getClient(url string) (*EthClient, error) {
@@ -467,10 +467,6 @@ func parseMethodParameters(c *ishell.Context, abiStruct *abi.ABI, methodName str
 	return
 }
 
-func checkClientExists(client *EthClient) bool {
-	return client != nil
-}
-
 func addContractInstance(pathToContract string, contractName string, contracts map[string]*contract.ContractInstance) error {
 	fmt.Println("Compiling contract...")
 	compiledContract, err := contract.CompileContractAt(pathToContract)
@@ -485,15 +481,4 @@ func addContractInstance(pathToContract string, contractName string, contracts m
 	fmt.Println("Creating contract instance...")
 	contracts[contractName] = &contract.ContractInstance{Contract: compiledContract, Abi: &abistruct, Path: pathToContract}
 	return nil
-}
-
-func strToHex(input string) (output string) {
-	val, err := strconv.Atoi(input)
-	if err != nil {
-		fmt.Println("please input decimal:", err)
-		return
-	}
-	output = strconv.FormatInt(int64(val), 16)
-
-	return "0x" + output
 }

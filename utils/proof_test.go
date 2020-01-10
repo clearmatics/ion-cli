@@ -6,7 +6,7 @@ import (
 	"encoding/hex"
 	"testing"
 
-	"github.com/clearmatics/ion/ion-cli/utils"
+	"github.com/clearmatics/ion-cli/utils"
 	"github.com/stretchr/testify/assert"
 )
 

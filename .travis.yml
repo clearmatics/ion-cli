@@ -1,0 +1,30 @@
+matrix:
+  include: 
+    - language: node_js
+      node_js:
+        - "8"
+      os: linux
+      dist: trusty
+
+  include:
+    - language: go
+      dist: xenial
+      env:
+        - GO111MODULE=on
+      go:
+        - 1.12.x
+      git:
+        depth: 1
+      install: true
+
+      before_script:
+        - npm install -g ganache-cli
+        - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(go env GOPATH)/bin latest
+
+      script:
+        # - ganache-cli --port 8545 --gasLimit 0xFFFFFFFFFFF --gasPrice 0 --defaultBalanceEther 99999999999 --networkId 1234 -m 'clrmtcs' > /dev/null &
+        - make lint
+        - make build
+        - make test
+        - make coverage
+  

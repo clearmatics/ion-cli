@@ -9,7 +9,7 @@ import (
 	"math/big"
 	"reflect"
 
-	"github.com/clearmatics/ion/ion-cli/utils"
+	"github.com/clearmatics/ion-cli/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -40,17 +40,6 @@ type EthClient struct {
 	client    *ethclient.Client
 	rpcClient *rpc.Client
 	url       string
-}
-
-func latestBlock(eth *EthClient) (lastBlock *types.Header) {
-	// var lastBlock Block
-	lastBlock, err := eth.client.HeaderByNumber(context.Background(), nil)
-	if err != nil {
-		fmt.Println("can't get latest block:", err)
-		return nil
-	}
-
-	return
 }
 
 func getBlockByNumber(eth *EthClient, number string) (*types.Header, []byte, error) {
@@ -196,11 +185,4 @@ func GenerateInterface(blockHeader header) (rest interface{}) {
 	}
 
 	return blockInterface
-}
-
-// Encodes a block
-func encodeBlock(blockInterface interface{}) (h []byte) {
-	h, _ = rlp.EncodeToBytes(blockInterface)
-
-	return h
 }
