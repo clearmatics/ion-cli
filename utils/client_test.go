@@ -7,9 +7,10 @@ import (
 	"testing"
 
 	"github.com/clearmatics/ion-cli/utils"
+	"github.com/stretchr/testify/assert"
 )
 
-const URL = "https://mainnet.infura.io"
+const URL = "https://rinkeby.infura.io"
 
 // NOTE: This tests depend on an external network (not really good)
 
@@ -19,16 +20,14 @@ func TestClient(t *testing.T) {
 }
 
 func TestGetReceipts(t *testing.T) {
-	expectedTotalReceipts := 92
+	expectedTotalReceipts := 7
 
 	client := utils.Client(URL)
 	defer client.Close()
 
-	blockNumber := big.NewInt(6021002)
+	blockNumber := big.NewInt(5768521)
 	block, err := client.BlockByNumber(context.Background(), blockNumber)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.Nil(t, err)
 
 	receiptArr := utils.GetBlockTxReceipts(client, block)
 
@@ -41,7 +40,7 @@ func TestBlockNumberByTransactionHash(t *testing.T) {
 	client := utils.Client(URL)
 	defer client.Close()
 
-	blockNumber := big.NewInt(6021002)
+	blockNumber := big.NewInt(5768521)
 	block, err := client.BlockByNumber(context.Background(), blockNumber)
 	if err != nil {
 		t.Fatal(err)
