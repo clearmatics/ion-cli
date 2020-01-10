@@ -2,6 +2,13 @@
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
 PACKAGES = $(shell find ./ -type d -not -path "./vendor" -not -path "./vendor/*" -not -path "./.git" -not -path "./.git/*" -not -path "./config/files")
 SHELL=/bin/bash
+TARGET_BINARY=ion-cli
+
+VERSION          := $(shell git describe --tags --always --dirty="-dev")
+DATE             := $(shell date -u '+%Y-%m-%d-%H%M UTC')
+HASH             := $(shell git rev-parse HEAD)
+VERSION_FLAGS    := -ldflags='-X "main.BuildVersion=$(VERSION)" -X "main.BuildDateTime=$(DATE)" -X "main.CommitHash=$(HASH)"'
+
 
 clean:
 	@rm -f ion-cli
@@ -22,10 +29,13 @@ coverage:
 		tail -n +2 coverage.out >> coverage-all.out;)
 	go tool cover -html=coverage-all.out
 
-build:
+modules: 
+	@go mod download
+	@go get 
+
+build: modules
 	# Build project
-	@go get -t -v ./...
-	@go build -o ion-cli .
+	@go build $(VERSION_FLAGS) -o $(TARGET_BINARY)
 
 check:
 	@if [ -n "$(shell gofmt -l ${GOFILES_NOVENDOR})" ]; then \
