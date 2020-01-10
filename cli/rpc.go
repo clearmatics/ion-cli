@@ -42,17 +42,6 @@ type EthClient struct {
 	url       string
 }
 
-func latestBlock(eth *EthClient) (lastBlock *types.Header) {
-	// var lastBlock Block
-	lastBlock, err := eth.client.HeaderByNumber(context.Background(), nil)
-	if err != nil {
-		fmt.Println("can't get latest block:", err)
-		return nil
-	}
-
-	return
-}
-
 func getBlockByNumber(eth *EthClient, number string) (*types.Header, []byte, error) {
 	// var blockHeader header
 	blockNum := new(big.Int)
@@ -196,11 +185,4 @@ func GenerateInterface(blockHeader header) (rest interface{}) {
 	}
 
 	return blockInterface
-}
-
-// Encodes a block
-func encodeBlock(blockInterface interface{}) (h []byte) {
-	h, _ = rlp.EncodeToBytes(blockInterface)
-
-	return h
 }

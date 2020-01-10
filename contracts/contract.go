@@ -176,7 +176,6 @@ func TransactionContract(
 	if err != nil {
 		errStr := fmt.Sprintf("ERROR marshalling abi to string: %s\n", err)
 		return nil, errors.New(errStr)
-		log.Fatal()
 	}
 
 	fmt.Print("JSONify ABI\n")

@@ -16,6 +16,7 @@ func GenerateProof(ctx context.Context, client *rpc.Client, txHash common.Hash) 
 	blockNumberStr, tx, err := BlockNumberByTransactionHash(ctx, client, txHash)
 	if err != nil {
 		fmt.Printf("Error: couldn't find block by tx hash: %s\n", err)
+		return []byte{}, err
 	}
 
 	// Convert returned blocknumber
@@ -50,10 +51,25 @@ func GenerateProof(ctx context.Context, client *rpc.Client, txHash common.Hash) 
 
 	var decodedTx, decodedTxProof, decodedReceipt, decodedReceiptProof []interface{}
 
-	rlp.DecodeBytes(txRLP, &decodedTx)
-	rlp.DecodeBytes(txProof, &decodedTxProof)
-	rlp.DecodeBytes(receiptRLP, &decodedReceipt)
-	rlp.DecodeBytes(receiptProof, &decodedReceiptProof)
+	err = rlp.DecodeBytes(txRLP, &decodedTx)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	err = rlp.DecodeBytes(txProof, &decodedTxProof)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	err = rlp.DecodeBytes(receiptRLP, &decodedReceipt)
+	if err != nil {
+		return []byte{}, err
+	}
+
+	err = rlp.DecodeBytes(receiptProof, &decodedReceiptProof)
+	if err != nil {
+		return []byte{}, err
+	}
 
 	proof := make([]interface{}, 0)
 	proof = append(proof, txPath, decodedTx, decodedTxProof, decodedReceipt, decodedReceiptProof)

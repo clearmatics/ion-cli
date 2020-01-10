@@ -448,6 +448,10 @@ func Launch() {
 					return
 				}
 				_, json, err = getTransactionByHash(client, c.Args[1])
+				if err != nil {
+					c.Println(err)
+					return
+				}
 			} else {
 				c.Println("Usage: \tgetTransactionByHash [optional rpc url] [hash]\n")
 				return
@@ -482,6 +486,10 @@ func Launch() {
 					return
 				}
 				_, json, err = getBlockByNumber(client, c.Args[1])
+				if err != nil {
+					c.Println(err)
+					return
+				}
 			} else {
 				c.Println("Usage: \tgetBlockByNumber [optional rpc url] [integer]\n")
 				return
@@ -516,6 +524,10 @@ func Launch() {
 					return
 				}
 				_, json, err = getBlockByHash(client, c.Args[1])
+				if err != nil {
+					c.Println(err)
+					return
+				}
 			} else {
 				c.Println("Usage: \tgetBlockByHash [optional rpc url] [hash] \n")
 				return
@@ -541,6 +553,10 @@ func Launch() {
 						return
 					}
 					encodedBlock, err := RlpEncode(block)
+					if err != nil {
+						c.Println(err)
+						return
+					}
 					c.Printf("Encoded Block: %+x\n", encodedBlock)
 				} else {
 					c.Println("Please connect to a Client before invoking this function.\nUse \tconnectToClient [rpc url] \n")
@@ -558,6 +574,10 @@ func Launch() {
 					return
 				}
 				encodedBlock, err := RlpEncode(block)
+				if err != nil {
+					c.Println(err)
+					return
+				}
 				c.Printf("Encoded Block:\n %+x\n", encodedBlock)
 			} else {
 				c.Println("Usage: \tgetEncodedBlockByHash [optional rpc url] [integer]\n")
@@ -579,6 +599,10 @@ func Launch() {
 						return
 					}
 					encodedBlock, err := RlpEncode(block)
+					if err != nil {
+						c.Println(err)
+						return
+					}
 					c.Printf("Encoded Block: %+x\n", encodedBlock)
 				} else {
 					c.Println("Please connect to a Client before invoking this function.\nUse \tconnectToClient [rpc url] \n")
@@ -596,6 +620,10 @@ func Launch() {
 					return
 				}
 				encodedBlock, err := RlpEncode(block)
+				if err != nil {
+					c.Println(err)
+					return
+				}
 				c.Printf("Encoded Block:\n %+x\n", encodedBlock)
 			} else {
 				c.Println("Usage: \tgetEncodedBlockByNumber [optional rpc url] [integer]\n")

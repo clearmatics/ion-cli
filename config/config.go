@@ -35,15 +35,19 @@ type Account struct {
 }
 
 // Takes path to a JSON and returns a struct of the contents
-func ReadSetup(config string) (setup Setup) {
+func ReadSetup(config string) (Setup, error) {
+	setup := Setup{}
 	raw, err := ioutil.ReadFile(config)
 	if err != nil {
-		fmt.Print(err, "\n")
+		return setup, err
 	}
 
 	err = json.Unmarshal(raw, &setup)
+	if err != nil {
+		return setup, err
+	}
 
-	return
+	return setup, nil
 }
 
 // Takes path to a JSON and returns a string of the contents
