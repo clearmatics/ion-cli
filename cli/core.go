@@ -15,8 +15,8 @@ import (
 
 	"github.com/abiosoft/ishell"
 
-	contract "github.com/clearmatics/ion/ion-cli/contracts"
-	"github.com/clearmatics/ion/ion-cli/utils"
+	contract "github.com/clearmatics/ion-cli/contracts"
+	"github.com/clearmatics/ion-cli/utils"
 )
 
 func getClient(url string) (*EthClient, error) {

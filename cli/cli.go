@@ -14,8 +14,8 @@ import (
 
 	"github.com/abiosoft/ishell"
 
-	"github.com/clearmatics/ion/ion-cli/config"
-	contract "github.com/clearmatics/ion/ion-cli/contracts"
+	"github.com/clearmatics/ion-cli/config"
+	contract "github.com/clearmatics/ion-cli/contracts"
 )
 
 // Launch - definition of commands and creates the interface
@@ -534,36 +534,36 @@ func Launch() {
 		Help: "use: \tgetEncodedBlockByHash [optional rpc url] [hash] \n\t\t\t\tdescription: Returns RLP-encoded block header specified by hash from connected client or from specific endpoint",
 		Func: func(c *ishell.Context) {
 			if len(c.Args) == 1 {
-                if ethClient != nil {
-                    block, _, err := getBlockByHash(ethClient, c.Args[0])
-                    if err != nil {
-                        c.Println(err)
-                        return
-                    }
-                    encodedBlock, err := RlpEncode(block)
-                    c.Printf("Encoded Block: %+x\n", encodedBlock)
-                } else {
-                    c.Println("Please connect to a Client before invoking this function.\nUse \tconnectToClient [rpc url] \n")
-                    return
-                }
-            } else if len(c.Args) == 2 {
-                client, err := getClient(c.Args[0])
-                if err != nil {
-                    c.Println(err)
-                    return
-                }
-                block, _, err := getBlockByHash(client, c.Args[0])
-                if err != nil {
-                    c.Println(err)
-                    return
-                }
-                encodedBlock, err := RlpEncode(block)
-                c.Printf("Encoded Block:\n %+x\n", encodedBlock)
-            } else {
-                c.Println("Usage: \tgetEncodedBlockByHash [optional rpc url] [integer]\n")
-                return
-            }
-            c.Println("===============================================================")
+				if ethClient != nil {
+					block, _, err := getBlockByHash(ethClient, c.Args[0])
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					encodedBlock, err := RlpEncode(block)
+					c.Printf("Encoded Block: %+x\n", encodedBlock)
+				} else {
+					c.Println("Please connect to a Client before invoking this function.\nUse \tconnectToClient [rpc url] \n")
+					return
+				}
+			} else if len(c.Args) == 2 {
+				client, err := getClient(c.Args[0])
+				if err != nil {
+					c.Println(err)
+					return
+				}
+				block, _, err := getBlockByHash(client, c.Args[0])
+				if err != nil {
+					c.Println(err)
+					return
+				}
+				encodedBlock, err := RlpEncode(block)
+				c.Printf("Encoded Block:\n %+x\n", encodedBlock)
+			} else {
+				c.Println("Usage: \tgetEncodedBlockByHash [optional rpc url] [integer]\n")
+				return
+			}
+			c.Println("===============================================================")
 		},
 	})
 
@@ -571,36 +571,36 @@ func Launch() {
 		Name: "getEncodedBlockByNumber",
 		Help: "use: \tgetEncodedBlockByNumber [optional rpc url] [hash] \n\t\t\t\tdescription: Returns RLP-encoded block header specified by number from connected client or from specific endpoint",
 		Func: func(c *ishell.Context) {
-		    if len(c.Args) == 1 {
-                if ethClient != nil {
+			if len(c.Args) == 1 {
+				if ethClient != nil {
 					block, _, err := getBlockByNumber(ethClient, c.Args[0])
 					if err != nil {
 						c.Println(err)
 						return
 					}
 					encodedBlock, err := RlpEncode(block)
-                    c.Printf("Encoded Block: %+x\n", encodedBlock)
-                } else {
-                    c.Println("Please connect to a Client before invoking this function.\nUse \tconnectToClient [rpc url] \n")
-                    return
-                }
-            } else if len(c.Args) == 2 {
-                client, err := getClient(c.Args[0])
-                if err != nil {
-                    c.Println(err)
-                    return
-                }
-                block, _, err := getBlockByNumber(client, c.Args[0])
-                if err != nil {
-                    c.Println(err)
-                    return
-                }
-                encodedBlock, err := RlpEncode(block)
-                c.Printf("Encoded Block:\n %+x\n", encodedBlock)
-            } else {
-                c.Println("Usage: \tgetEncodedBlockByNumber [optional rpc url] [integer]\n")
-                return
-            }
+					c.Printf("Encoded Block: %+x\n", encodedBlock)
+				} else {
+					c.Println("Please connect to a Client before invoking this function.\nUse \tconnectToClient [rpc url] \n")
+					return
+				}
+			} else if len(c.Args) == 2 {
+				client, err := getClient(c.Args[0])
+				if err != nil {
+					c.Println(err)
+					return
+				}
+				block, _, err := getBlockByNumber(client, c.Args[0])
+				if err != nil {
+					c.Println(err)
+					return
+				}
+				encodedBlock, err := RlpEncode(block)
+				c.Printf("Encoded Block:\n %+x\n", encodedBlock)
+			} else {
+				c.Println("Usage: \tgetEncodedBlockByNumber [optional rpc url] [integer]\n")
+				return
+			}
 			c.Println("===============================================================")
 		},
 	})

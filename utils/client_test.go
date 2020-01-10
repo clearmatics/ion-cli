@@ -6,7 +6,7 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/clearmatics/ion/ion-cli/utils"
+	"github.com/clearmatics/ion-cli/utils"
 )
 
 const URL = "https://mainnet.infura.io"

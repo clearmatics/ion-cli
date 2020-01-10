@@ -6,7 +6,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"github.com/ethereum/go-ethereum/ethdb/memorydb"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/trie"
 )
@@ -62,7 +62,7 @@ func generateTrie(paths [][]byte, values [][]byte) *trie.Trie {
 		log.Fatal("Paths array and Values array have different lengths when generating Trie")
 	}
 
-	trieDB := trie.NewDatabase(ethdb.NewMemDatabase())
+	trieDB := trie.NewDatabase(memorydb.New())
 	trieObj, _ := trie.New(common.Hash{}, trieDB) // empty trie
 
 	for idx := range paths {
@@ -91,7 +91,7 @@ func Proof(trie *trie.Trie, path []byte) []byte {
 }
 
 func generateProof(trie *trie.Trie, path []byte) []interface{} {
-	proof := ethdb.NewMemDatabase()
+	proof := memorydb.New()
 	err := trie.Prove(path, 0, proof)
 	if err != nil {
 		log.Fatal("ERROR failed to create proof")
