@@ -5,8 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-        with: 
-          token: ${{ secrets.GITHUB_PAT_TOKEN }}
+
       - name: Cache Modules
         uses: actions/cache@v1
         with:
@@ -23,7 +22,7 @@ jobs:
           export GO111MODULE=on
           export GOBIN=$GOPATH/bin
           export GOPRIVATE="github.com/clearmatics"
-          git config --global url."https://${{ secrets.GITHUB_USER }}:${{ secrets.GITHUB_PAT_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://${{ secrets.GITHUB_USER }}:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
           go install github.com/golangci/golangci-lint/cmd/golangci-lint
           make lint
           make build
