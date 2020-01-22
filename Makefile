@@ -1,6 +1,6 @@
 .DEFAULT_GOAL := build
 GOFILES_NOVENDOR = $(shell find . -type f -name '*.go' -not -path "./vendor/*")
-PACKAGES = $(shell find ./ -type d -not -path "./keystore" -not -path "./vendor" -not -path "./vendor/*" -not -path "./.git" -not -path "./.git/*" -not -path "./config/files")
+PACKAGES = $(shell find ./ -type d -not -path "./keystore" -not -path "./vendor" -not -path "./vendor/*" -not -path "./.github" -not -path "./.github/*" -not -path "./.git" -not -path "./.git/*" -not -path "./config/files")
 SHELL=/bin/bash
 TARGET_BINARY=ion-cli
 
