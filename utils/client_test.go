@@ -10,12 +10,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const URL = "https://rinkeby.infura.io"
+const URL = "https://rinkeby.infura.io/v3/430e7d9d2b104879aee73ced56f0b8ba"
 
 // NOTE: This tests depend on an external network (not really good)
+var client = utils.Client(URL)
 
 func TestClient(t *testing.T) {
-	client := utils.Client(URL)
+
 	client.Close()
 }
 
