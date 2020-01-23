@@ -1,0 +1,33 @@
+on: ["push", "pull_request"]
+name: "Continuous Integration"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Cache Modules
+        uses: actions/cache@v1
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Setup Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: '1.13' 
+      - run: |
+          export PATH=$PATH:$(go env GOPATH)/bin
+          export GO111MODULE=on
+          export GOBIN=$GOPATH/bin
+          export GOPRIVATE="github.com/clearmatics"
+          git config --global url."https://${{ secrets.GITHUB_USER }}:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          go install github.com/golangci/golangci-lint/cmd/golangci-lint
+          make lint
+          make build
+          make test
+          make coverage
+        env:
+          GOPATH: "/home/runner/go"
+          GOBIN: "/home/runner/go/bin"
