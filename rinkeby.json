@@ -7,7 +7,7 @@
   "function-addr":"0x93981af8db02c7ef40d0ed61caef2726a79eb903",
   "validation-addr":"0x9abefbe4cca994c5d1934dff50c6a863edcf5f52",
   "validation-chainid":"0xab830ae0774cb20180c8b463202659184033a9f30a21550b89a2b406c3ac8075",
-  "rpc-from":"https://rinkeby.infura.io",
+  "rpc-from":"https://rinkeby.infura.io/v3/430e7d9d2b104879aee73ced56f0b8ba",
   "account-from":"0x2be5ab0e43b6dc2908d5321cf318f35b80d0c10d",
   "password-from":"password1",
   "trigger-addr":"0x61621bcf02914668f8404c1f860e92fc1893f74c",
