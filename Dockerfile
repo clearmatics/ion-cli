@@ -7,9 +7,6 @@ RUN apt-get update && apt-get install -y \
         sudo \
         wget
 
-
-# Install a recent version of nodejs
-RUN curl -sL https://deb.nodesource.com/setup_10.x | sudo bash - && sudo apt-get install -y nodejs
 COPY . /go/src/github.com/clearmatics/ion-cli
 
 # Install the current compatible solc version
