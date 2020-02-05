@@ -14,19 +14,19 @@ import (
 
 // Settings
 type Setup struct {
-	AddrTo       string `json:"rpc-to"`
-	AccountTo    string `json:"account-to"`
-	PasswordTo   string `json:"password-to"`
-	KeystoreTo   string `json:"keystore-to"`
-	AddrFrom     string `json:"rpc-from"`
-	AccountFrom  string `json:"account-from"`
-	PasswordFrom string `json:"password-from"`
-	KeystoreFrom string `json:"keystore-from"`
-	ChainId      string `json:"validation-chainid"`
-	Validation   string `json:"validation-addr"`
-	Ion          string `json:"ion-addr"`
-	Trigger      string `json:"trigger-addr"`
-	Function     string `json:"function-addr"`
+	Accounts  []ConfigAccount   `json:"accounts"`
+	Contracts []ConfigContracts `json:"contracts"`
+}
+
+type ConfigAccount struct {
+	Name     string `json:"name"`
+	Keyfile  string `json:"keyfile"`
+	Password string `json:"password"`
+}
+
+type ConfigContracts struct {
+	Name string `json:"name"`
+	File string `json:"file"`
 }
 
 type Account struct {
@@ -63,24 +63,24 @@ func ReadString(path string) (contents string) {
 
 }
 
-func InitUser(privkeystore string, password string) (auth *bind.TransactOpts, userkey *keystore.Key, err error) {
+func InitUser(privkeystore string, password string) (user Account, err error) {
 	// retrieve private key
 	keyjson, err := ioutil.ReadFile(privkeystore)
 	if err != nil {
-		return nil, nil, err
+		return Account{}, err
 	}
 
-	userkey, err = keystore.DecryptKey(keyjson, password)
+	userkey, err := keystore.DecryptKey(keyjson, password)
 	if err != nil {
-		return nil, nil, err
+		return Account{}, err
 	}
 
 	// Create an authorized transactor
 	key := ReadString(privkeystore)
-	auth, err = bind.NewTransactor(strings.NewReader(key), password)
+	auth, err := bind.NewTransactor(strings.NewReader(key), password)
 	if err != nil {
-		return nil, nil, err
+		return Account{}, err
 	}
 
-	return
+	return Account{auth, userkey}, nil
 }

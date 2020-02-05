@@ -18,8 +18,16 @@ import (
 	contract "github.com/clearmatics/ion-cli/contracts"
 )
 
+func printWelcome() {
+	// display welcome info.
+	fmt.Println("===============================================================")
+	fmt.Print("Ion Command Line Interface\n\n")
+	fmt.Println("Use 'help' to list commands")
+	fmt.Println("===============================================================")
+}
+
 // Launch - definition of commands and creates the interface
-func Launch() {
+func Launch(setup config.Setup) {
 	// by default, new shell includes 'exit', 'help' and 'clear' commands.
 	shell := ishell.New()
 
@@ -27,8 +35,26 @@ func Launch() {
 	ctx := context.Background()
 
 	var ethClient *EthClient = nil
-	var contracts map[string]*contract.ContractInstance = make(map[string]*contract.ContractInstance)
-	var accounts map[string]*config.Account = make(map[string]*config.Account)
+	var contracts = make(map[string]*contract.ContractInstance)
+	var accounts = make(map[string]*config.Account)
+
+	// Add all accounts in config to memory
+	for _, account := range setup.Accounts {
+		user, err := config.InitUser(account.Keyfile, account.Password)
+		if err != nil {
+			fmt.Printf("Setup Failed: Adding Account %s from configuration failed %s", account.Name, err.Error())
+			return
+		}
+		accounts[account.Name] = &user
+	}
+
+	for _, configContract := range setup.Contracts {
+		err := addContractInstance(configContract.File, configContract.Name, contracts)
+		if err != nil {
+			fmt.Printf("Setup Failed: Compiling contract %s from configuration failed: %s", configContract.Name, err.Error())
+			return
+		}
+	}
 
 	//---------------------------------------------------------------------------------------------
 	// 	RPC Client Specific Commands
@@ -94,13 +120,12 @@ func Launch() {
 				defer c.ShowPrompt(true)
 				c.Println("Please provide your key decryption password.")
 				input := c.ReadPassword()
-				auth, key, err := config.InitUser(c.Args[1], input)
+				account, err := config.InitUser(c.Args[1], input)
 				if err != nil {
 					c.Println(err)
 					return
 				}
-				account := &config.Account{Auth: auth, Key: key}
-				accounts[c.Args[0]] = account
+				accounts[c.Args[0]] = &account
 
 				c.Println("Account added succesfully.")
 			}
@@ -743,5 +768,6 @@ func Launch() {
 		},
 	})
 
+	printWelcome()
 	shell.Run()
 }

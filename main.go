@@ -3,21 +3,27 @@
 package main
 
 import (
+	"flag"
 	"fmt"
+	"github.com/clearmatics/ion-cli/config"
+
+	//"github.com/clearmatics/ion-cli/config"
 
 	"github.com/clearmatics/ion-cli/cli"
 )
 
 func main() {
-	// Launch the CLI
-	printWelcome()
-	cli.Launch()
-}
+	configFilePtr := flag.String("config", "", "File location of configuration file")
+	flag.Parse()
 
-func printWelcome() {
-	// display welcome info.
-	fmt.Println("===============================================================")
-	fmt.Print("Ion Command Line Interface\n\n")
-	fmt.Println("Use 'help' to list commands")
-	fmt.Println("===============================================================")
+	if *configFilePtr != "" {
+		fmt.Printf("Configuring session...\n")
+		configuration, err := config.ReadSetup(*configFilePtr)
+		if err != nil {
+			fmt.Printf("Could not read configuration file %s: %s", *configFilePtr, err.Error())
+		} else {
+			// Launch the CLI
+			cli.Launch(configuration)
+		}
+	}
 }

@@ -1,0 +1,15 @@
+{
+  "contracts": [
+    {
+      "name": "ion",
+      "file": "/Users/Shirikatsu/git/ion/contracts/Ion.sol"
+    }
+  ],
+  "accounts": [
+    {
+      "name": "me",
+      "keyfile": "/Users/Shirikatsu/git/ion-cli/keystore/UTC--2018-11-14T13-34-31.599642840Z--b8844cf76df596e746f360957aa3af954ef51605",
+      "password": "test"
+    }
+  ]
+}
