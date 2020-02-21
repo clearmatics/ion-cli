@@ -225,27 +225,28 @@ func CompileContract(contract string) (compiledContract *compiler.Contract, err 
 	return compiledContract, nil
 }
 
-func CompileContractAt(contractPath string) (compiledContract *compiler.Contract, err error) {
+func CompileContractAt(contractPath string, solc string) (compiledContract *compiler.Contract, err error) {
 	path := strings.Split(contractPath, "/")
-	contractName := path[len(path)-1]
 	contractFolder := path[len(path)-2]
 
 	i := strings.Index(contractPath, contractFolder)
 	remapping := fmt.Sprintf("../=%s", contractPath[:i])
 
-	contract, err := compiler.CompileSolidity("", []string{remapping}, contractPath)
+	contract, err := compiler.CompileSolidity(solc, []string{remapping}, contractPath)
 	if err != nil {
 		return nil, err
 	}
 
-	compiledContract = contract[contractPath+":"+strings.Replace(contractName, ".sol", "", -1)]
+	// Only compiling one contract, so only one key exists
+	for key := range contract {
+		return contract[key], nil
+	}
 
-	return compiledContract, nil
+	return nil, errors.New("compiled contract contains no data")
 }
 
 func CompileContractWithLibraries(contractPath string, libraries map[string]common.Address) (compiledContract *compiler.Contract, err error) {
 	path := strings.Split(contractPath, "/")
-	contractName := path[len(path)-1]
 	contractFolder := path[len(path)-2]
 
 	args := []string{}
@@ -265,7 +266,11 @@ func CompileContractWithLibraries(contractPath string, libraries map[string]comm
 		return nil, err
 	}
 
-	compiledContract = contract[contractPath+":"+strings.Replace(contractName, ".sol", "", -1)]
+	// Only compiling one contract, so only one key exists
+	for key := range contract {
+		return contract[key], nil
+	}
 
-	return compiledContract, nil
+	return nil, errors.New("compiled contract contains no data")
+
 }
