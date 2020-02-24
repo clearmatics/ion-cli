@@ -16,6 +16,7 @@ import (
 type Setup struct {
 	Accounts  []ConfigAccount   `json:"accounts"`
 	Contracts []ConfigContracts `json:"contracts"`
+	Networks  []ConfigNetworks  `json:"networks"`
 }
 
 type ConfigAccount struct {
@@ -27,6 +28,11 @@ type ConfigAccount struct {
 type ConfigContracts struct {
 	Name string `json:"name"`
 	File string `json:"file"`
+}
+
+type ConfigNetworks struct {
+	Name string `json:"name"`
+	Uri  string `json:"uri"`
 }
 
 type Account struct {

@@ -14,6 +14,25 @@ import (
 
 const defaultSolidityVersion = "0.5.12" // Match Ion Release contract versions
 
+func (session *Session) RemoveAllCompilers() {
+	for _, compiler := range session.Compilers {
+		DestroyTempFile(compiler)
+	}
+}
+
+func (session *Session) AddCompilerIfNotExists(version string) error {
+	if _, ok := session.Compilers[version]; !ok {
+		fmt.Printf("Compiler for version %s does not exist\n", version)
+		solc, err := GetSolidityCompilerVersion(version)
+		if err != nil {
+			return err
+		}
+
+		session.Compilers[version] = solc.Name()
+	}
+	return nil
+}
+
 // Hacky way to find correct contract version
 // Attempts to compile using default solc version and parses solc error to retrieve correct version
 func GetSolidityContractVersion(contractFilePath string) (string, error) {
@@ -21,6 +40,7 @@ func GetSolidityContractVersion(contractFilePath string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	defer DestroyTempFile(solc.Name())
 
 	compiledContract, err := contract.CompileContractAt(contractFilePath, solc.Name())
 	if compiledContract != nil {
@@ -60,16 +80,29 @@ func GetDefaultSolidityCompiler() (*os.File, error) {
 	case "darwin":
 		return nil, nil
 	case "linux":
-		return GetSolidityCompilerLinux(defaultSolidityVersion)
+		return getSolidityCompilerLinux(defaultSolidityVersion)
 	}
 
 	return nil, nil
 }
 
-func GetSolidityCompilerLinux(version string) (*os.File, error) {
+func GetSolidityCompilerVersion(version string) (*os.File, error) {
+	switch runtime.GOOS {
+	case "darwin":
+		return nil, nil
+	case "linux":
+		fmt.Printf("System is Linux\n")
+		return getSolidityCompilerLinux(version)
+	}
+
+	return nil, nil
+}
+
+func getSolidityCompilerLinux(version string) (*os.File, error) {
+	fmt.Printf("Getting Solidity compiler for version %s\n", version)
 	url := fmt.Sprintf("https://github.com/ethereum/solidity/releases/download/v%s/solc-static-linux", version)
 
-	file, err := DownloadSolidityCompiler(url)
+	file, err := downloadSolidityCompiler(url)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +115,7 @@ func GetSolidityCompilerLinux(version string) (*os.File, error) {
 	return file, nil
 }
 
-func DownloadSolidityCompiler(url string) (*os.File, error) {
+func downloadSolidityCompiler(url string) (*os.File, error) {
 	// Get the data
 	resp, err := http.Get(url)
 	if err != nil {

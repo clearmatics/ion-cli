@@ -1,5 +1,5 @@
 // Copyright (c) 2018 Clearmatics Technologies Ltd
-package cli
+package core
 
 import (
 	"encoding/hex"

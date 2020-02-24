@@ -1,9 +1,11 @@
-package cli
+package core
 
 import (
+	"context"
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"github.com/clearmatics/ion-cli/config"
 	"math/big"
 	"reflect"
 	"strconv"
@@ -19,13 +21,28 @@ import (
 	"github.com/clearmatics/ion-cli/utils"
 )
 
-func getClient(url string) (*EthClient, error) {
+func InitSession() *Session {
+	session := Session{}
+	session.Context = context.Background()
+	session.Networks = make(map[string]*EthClient)
+	session.Contracts = make(map[string]*contract.ContractInstance)
+	session.Accounts = make(map[string]*config.Account)
+	session.Compilers = make(map[string]string)
+
+	return &session
+}
+
+func (session *Session) Close() {
+	session.RemoveAllCompilers()
+}
+
+func GetClient(url string) (*EthClient, error) {
 	rpc := utils.ClientRPC(url)
 	eth := ethclient.NewClient(rpc)
 
-	client := EthClient{client: eth, rpcClient: rpc, url: url}
+	client := EthClient{Client: eth, RpcClient: rpc, Url: url}
 
-	_, _, err := getBlockByNumber(&client, "0")
+	_, _, err := GetBlockByNumber(&client, "0")
 
 	return &client, err
 }
@@ -467,18 +484,64 @@ func parseMethodParameters(c *ishell.Context, abiStruct *abi.ABI, methodName str
 	return
 }
 
-func addContractInstance(pathToContract string, contractName string, contracts map[string]*contract.ContractInstance) error {
-	fmt.Println("Compiling contract...")
-	compiledContract, err := contract.CompileContractAt(pathToContract)
+func CompileContract(session *Session, pathToContract string) (*contract.ContractInstance, error) {
+	fmt.Printf("Compiling contract %s...\n", pathToContract)
+	version, err := GetSolidityContractVersion(pathToContract)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, Abi := contract.GetContractBytecodeAndABI(compiledContract)
-	abistruct, err := abi.JSON(strings.NewReader(Abi))
+
+	fmt.Printf("Contract version is %s\n", version)
+
+	err = session.AddCompilerIfNotExists(version)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	fmt.Println("Creating contract instance...")
-	contracts[contractName] = &contract.ContractInstance{Contract: compiledContract, Abi: &abistruct, Path: pathToContract}
-	return nil
+
+	solc := session.Compilers[version]
+	return createContractInstance(pathToContract, solc)
+}
+
+func CompileLinkedContract(session *Session, pathToContract string, libraries map[string]common.Address) (*contract.ContractInstance, error) {
+	fmt.Printf("Compiling contract %s...\n", pathToContract)
+	version, err := GetSolidityContractVersion(pathToContract)
+	if err != nil {
+		return nil, err
+	}
+
+	fmt.Printf("Contract version is %s\n", version)
+
+	err = session.AddCompilerIfNotExists(version)
+	if err != nil {
+		return nil, err
+	}
+
+	solc := session.Compilers[version]
+	return createLinkedContractInstance(pathToContract, libraries, solc)
+}
+
+func createContractInstance(pathToContract string, solc string) (*contract.ContractInstance, error) {
+	compiledContract, err := contract.CompileContractAt(pathToContract, solc)
+	if err != nil {
+		return nil, err
+	}
+	binStr, abiStr := contract.GetContractBytecodeAndABI(compiledContract)
+	abistruct, err := abi.JSON(strings.NewReader(abiStr))
+	if err != nil {
+		return nil, err
+	}
+	return &contract.ContractInstance{Contract: compiledContract, Abi: &abistruct, Path: pathToContract, AbiStr: abiStr, BinStr: binStr}, nil
+}
+
+func createLinkedContractInstance(pathToContract string, libraries map[string]common.Address, solc string) (*contract.ContractInstance, error) {
+	compiledContract, err := contract.CompileContractWithLibraries(pathToContract, libraries, solc)
+	if err != nil {
+		return nil, err
+	}
+	binStr, abiStr := contract.GetContractBytecodeAndABI(compiledContract)
+	abistruct, err := abi.JSON(strings.NewReader(abiStr))
+	if err != nil {
+		return nil, err
+	}
+	return &contract.ContractInstance{Contract: compiledContract, Abi: &abistruct, Path: pathToContract, AbiStr: abiStr, BinStr: binStr}, nil
 }

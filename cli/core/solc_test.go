@@ -38,7 +38,7 @@ func Test_GetVersionedSolidityCompilerFromContract(t *testing.T) {
 	assert.Assert(t, err == nil)
 	assert.Equal(t, version, "0.4.12")
 
-	solc, err := GetSolidityCompilerLinux(version)
+	solc, err := getSolidityCompilerLinux(version)
 	if err != nil {
 		t.Error(err)
 	}

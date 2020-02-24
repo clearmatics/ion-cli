@@ -5,11 +5,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/clearmatics/ion-cli/config"
-
-	//"github.com/clearmatics/ion-cli/config"
-
 	"github.com/clearmatics/ion-cli/cli"
+	"github.com/clearmatics/ion-cli/config"
 )
 
 func main() {
@@ -23,7 +20,9 @@ func main() {
 			fmt.Printf("Could not read configuration file %s: %s", *configFilePtr, err.Error())
 		} else {
 			// Launch the CLI
-			cli.Launch(configuration)
+			cli.Launch(&configuration)
 		}
+	} else {
+		cli.Launch(nil)
 	}
 }
