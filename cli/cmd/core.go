@@ -22,7 +22,7 @@ import (
 	"strings"
 )
 
-func CoreCommands(session *core.Session) []*ishell.Cmd {
+func CoreCommands(shell *ishell.Shell, session *core.Session) []*ishell.Cmd {
 	return []*ishell.Cmd{
 		{
 			Name: "addClient",
@@ -48,6 +48,8 @@ func CoreCommands(session *core.Session) []*ishell.Cmd {
 
 					session.Networks[*name] = client
 					c.Println("Connected!")
+				} else {
+					c.Println(err.Error())
 				}
 				c.Println("===============================================================")
 			},
@@ -89,6 +91,8 @@ func CoreCommands(session *core.Session) []*ishell.Cmd {
 
 					session.Contracts[*name] = compiledContract
 					c.Println("Added!")
+				} else {
+					c.Println(err.Error())
 				}
 				c.Println("===============================================================")
 			},
@@ -131,6 +135,8 @@ func CoreCommands(session *core.Session) []*ishell.Cmd {
 					session.Accounts[*name] = &account
 
 					c.Println("Account added succesfully.")
+				} else {
+					c.Println(err.Error())
 				}
 
 				c.Println("===============================================================")
@@ -218,6 +224,8 @@ func CoreCommands(session *core.Session) []*ishell.Cmd {
 						return
 					}
 					c.Printf("Deployed contract at: %s\n", addr.String())
+				} else {
+					c.Println(err.Error())
 				}
 
 				c.Println("===============================================================")
@@ -227,7 +235,7 @@ func CoreCommands(session *core.Session) []*ishell.Cmd {
 			Name: "linkAndDeployContract",
 			Help: "use: \tlinkAndDeployContract -contract -account -client -gasLimit -libraries\n\t\t\t\tdescription: Deploys specified contract instance while linking to existing deployed libraries",
 			Func: func(c *ishell.Context) {
-				flagSet := flag.NewFlagSet("deployContract", flag.ContinueOnError)
+				flagSet := flag.NewFlagSet("linkAndDeployContract", flag.ContinueOnError)
 				contractName := flagSet.String("contract", "", "Name of compiled contract to deploy")
 				accountName := flagSet.String("account", "", "Name of account to deploy from")
 				clientName := flagSet.String("client", "", "Name of client to deploy to")
@@ -311,86 +319,18 @@ func CoreCommands(session *core.Session) []*ishell.Cmd {
 						return
 					}
 					c.Printf("Deployed contract at: %s\n", addr.String())
+				} else {
+					c.Println(err.Error())
 				}
 
 				c.Println("===============================================================")
 			},
 		},
 		{
-			Name: "transactionMessage",
-			Help: "use: \ttransactionMessage -contract -address -function -account -client -ether -gasLimit \n\t\t\t\tdescription: Calls a contract function as a transaction.",
+			Name: "functionTransaction",
+			Help: "use: \tfunctionTransaction -contract -address -function -account -client -ether -gasLimit \n\t\t\t\tdescription: Calls a contract function as a transaction.",
 			Func: func(c *ishell.Context) {
-				//if len(c.Args) != 6 {
-				//	c.Println("Usage: \ttransactionMessage [contract name] [function name] [from account name] [deployed contract address] [amount] [gasLimit] \n")
-				//} else {
-				//	if ethClient == nil {
-				//		c.Println("Please connect to a Client before invoking this function.\nUse \tconnectToClient [rpc Url] \n")
-				//		return
-				//	}
-				//
-				//	instance := contracts[c.Args[0]]
-				//	methodName := c.Args[1]
-				//	account := accounts[c.Args[2]]
-				//	contractDeployedAddress := common.HexToAddress(c.Args[3])
-				//
-				//	if instance == nil {
-				//		errStr := fmt.Sprintf("Contract instance %s not found.\nUse \taddContractInstance [name] [path/to/solidity/contract] \n", c.Args[0])
-				//		c.Println(errStr)
-				//		return
-				//	}
-				//	if account == nil {
-				//		errStr := fmt.Sprintf("Account %s not found.\nUse \taddAccount [name] [path/to/keystore]\n", c.Args[2])
-				//		c.Println(errStr)
-				//		return
-				//	}
-				//
-				//	amount := new(big.Int)
-				//	amount, ok := amount.SetString(c.Args[4], 10)
-				//	if !ok {
-				//		c.Err(errors.New("Please enter an integer for <amount>"))
-				//	}
-				//	gasLimit, err := strconv.ParseUint(c.Args[5], 10, 64)
-				//	if err != nil {
-				//		c.Err(errors.New("Please enter an integer for <gasLimit>"))
-				//	}
-				//
-				//	if instance.Abi.Methods[methodName].Name == "" {
-				//		c.Printf("Method name \"%s\" not found for contract \"%s\"\n", methodName, c.Args[0])
-				//		return
-				//	}
-				//
-				//	inputs, err := parseMethodParameters(c, instance.Abi, methodName)
-				//	if err != nil {
-				//		c.Printf("Error parsing parameters: %s\n", err)
-				//		return
-				//	}
-				//
-				//	tx, err := contract.TransactionContract(
-				//		ctx,
-				//		ethClient.client,
-				//		account.Key.PrivateKey,
-				//		instance.Contract,
-				//		contractDeployedAddress,
-				//		amount,
-				//		gasLimit,
-				//		c.Args[1],
-				//		inputs...,
-				//	)
-				//	if err != nil {
-				//		c.Println(err)
-				//		return
-				//	} else {
-				//		c.Println("Waiting for transaction to be mined...")
-				//		receipt, err := bind.WaitMined(ctx, ethClient.client, tx)
-				//		if err != nil {
-				//			c.Println(err)
-				//			return
-				//		}
-				//		c.Printf("Transaction hash: %s\n", receipt.TxHash.String())
-				//	}
-				//}
-
-				flagSet := flag.NewFlagSet("deployContract", flag.ContinueOnError)
+				flagSet := flag.NewFlagSet("functionTransaction", flag.ContinueOnError)
 				contractName := flagSet.String("contract", "", "Name of contract of which a function will be called")
 				contractAddress := flagSet.String("address", "", "Address of deployed contract")
 				functionName := flagSet.String("function", "", "Name of function to be called")
@@ -471,8 +411,287 @@ func CoreCommands(session *core.Session) []*ishell.Cmd {
 						}
 						c.Printf("Transaction hash: %s\n", receipt.TxHash.String())
 					}
+				} else {
+					c.Println(err.Error())
 				}
 
+				c.Println("===============================================================")
+			},
+		},
+		{
+			Name: "functionCall",
+			Help: "use: \tfunctionCall [contract name] [function name] [from account name] [deployed contract address] \n\t\t\t\tdescription: Calls a contract function returning result without mutating state.",
+			Func: func(c *ishell.Context) {
+				flagSet := flag.NewFlagSet("functionCall", flag.ContinueOnError)
+				contractName := flagSet.String("contract", "", "Name of contract of which a function will be called")
+				contractAddress := flagSet.String("address", "", "Address of deployed contract")
+				functionName := flagSet.String("function", "", "Name of function to be called")
+				accountName := flagSet.String("account", "", "Name of account to call function from")
+				clientName := flagSet.String("client", "", "Name of client to send request to")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 5 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Contracts[*contractName]; !ok {
+						c.Println(fmt.Sprintf("Contract %s not recognised. Please use addContractInstance to add a new contract or specify a correct contract name.", *contractName))
+						return
+					}
+					if _, ok := session.Accounts[*accountName]; !ok {
+						c.Println(fmt.Sprintf("Account %s not recognised. Please use addAccount to add a new account or specify a correct account name.", *accountName))
+						return
+					}
+
+					if _, ok := session.Networks[*clientName]; !ok {
+						c.Println(fmt.Sprintf("Client %s not recognised. Please use addClient to add a new connected client first or specify a correct Client name.", *clientName))
+						return
+					}
+
+					contract := session.Contracts[*contractName]
+					client := session.Networks[*clientName]
+					account := session.Accounts[*accountName]
+
+					contractDeployedAddress := common.HexToAddress(*contractAddress)
+
+					if contract.Abi.Methods[*functionName].Name == "" {
+						c.Printf("Method name \"%s\" not found for contract \"%s\"\n", *functionName, *contractName)
+						return
+					}
+
+					inputs, err := parseMethodParameters(c, contract.Abi, *functionName)
+					if err != nil {
+						c.Printf("Error parsing parameters: %s\n", err)
+						return
+					}
+
+					var out interface{}
+
+					out, err = contracts.CallContract(
+						session.Context,
+						client.Client,
+						contract.Contract,
+						account.Key.Address,
+						contractDeployedAddress,
+						*functionName,
+						out,
+						inputs...,
+					)
+					if err != nil {
+						c.Println(err)
+						return
+					} else {
+						c.Printf("Result: %s\n", out)
+					}
+				} else {
+					c.Println(err.Error())
+				}
+
+				c.Println("===============================================================")
+			},
+		},
+		{
+			Name: "getTransactionByHash",
+			Help: "use: \tgetTransactionByHash -client -hash\n\t\t\t\tdescription: Returns transaction specified by hash from connected Client or specified endpoint",
+			Func: func(c *ishell.Context) {
+				flagSet := flag.NewFlagSet("getTransactionByHash", flag.ContinueOnError)
+				clientName := flagSet.String("client", "", "Name of client to send request to")
+				hash := flagSet.String("hash", "", "Transaction hash")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 2 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Networks[*clientName]; !ok {
+						c.Println(fmt.Sprintf("Client %s not recognised. Please use addClient to add a new connected client first or specify a correct Client name.", *clientName))
+						return
+					}
+					client := session.Networks[*clientName]
+
+					_, tx, err := core.GetTransactionByHash(client, *hash)
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					c.Printf("Transaction: \n%s\n", tx)
+				} else {
+					c.Println(err.Error())
+				}
+				c.Println("===============================================================")
+			},
+		},
+		{
+			Name: "getBlockByNumber",
+			Help: "use: \tgetBlockByNumber -height -client\n\t\t\t\tdescription: Returns block header specified by height",
+			Func: func(c *ishell.Context) {
+				flagSet := flag.NewFlagSet("getBlockByNumber", flag.ContinueOnError)
+				clientName := flagSet.String("client", "", "Name of client to send request to")
+				number := flagSet.String("height", "", "Block height")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 2 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Networks[*clientName]; !ok {
+						c.Println(fmt.Sprintf("Client %s not recognised. Please use addClient to add a new connected client first or specify a correct Client name.", *clientName))
+						return
+					}
+					client := session.Networks[*clientName]
+
+					_, block, err := core.GetBlockByNumber(client, *number)
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					c.Printf("Block: %s\n", block)
+				} else {
+					c.Println(err.Error())
+				}
+				c.Println("===============================================================")
+			},
+		},
+		{
+			Name: "getBlockByHash",
+			Help: "use: \tgetBlockByHash -client -hash \n\t\t\t\tdescription: Returns block header specified by hash",
+			Func: func(c *ishell.Context) {
+				flagSet := flag.NewFlagSet("getBlockByHash", flag.ContinueOnError)
+				clientName := flagSet.String("client", "", "Name of client to send request to")
+				hash := flagSet.String("hash", "", "Block hash")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 2 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Networks[*clientName]; !ok {
+						c.Println(fmt.Sprintf("Client %s not recognised. Please use addClient to add a new connected client first or specify a correct Client name.", *clientName))
+						return
+					}
+					client := session.Networks[*clientName]
+
+					_, block, err := core.GetBlockByHash(client, *hash)
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					c.Printf("Block: %s\n", block)
+				} else {
+					c.Println(err.Error())
+				}
+				c.Println("===============================================================")
+			},
+		},
+		{
+			Name: "getRLPEncodedBlockByHash",
+			Help: "use: \tgetRLPEncodedBlockByHash -client -hash \n\t\t\t\tdescription: Returns RLP-encoded block header specified by hash",
+			Func: func(c *ishell.Context) {
+				flagSet := flag.NewFlagSet("getRLPEncodedBlockByHash", flag.ContinueOnError)
+				clientName := flagSet.String("client", "", "Name of client to send request to")
+				hash := flagSet.String("hash", "", "Block hash")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 2 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Networks[*clientName]; !ok {
+						c.Println(fmt.Sprintf("Client %s not recognised. Please use addClient to add a new connected client first or specify a correct Client name.", *clientName))
+						return
+					}
+					client := session.Networks[*clientName]
+
+					block, _, err := core.GetBlockByHash(client, *hash)
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					encodedBlock, err := core.RlpEncode(block)
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					c.Printf("Encoded Block: \n%+x\n", encodedBlock)
+				} else {
+					c.Println(err.Error())
+				}
+				c.Println("===============================================================")
+			},
+		},
+		{
+			Name: "getRLPEncodedBlockByNumber",
+			Help: "use: \tgetRLPEncodedBlockByNumber -client -height\n\t\t\t\tdescription: Returns RLP-encoded block header specified by number",
+			Func: func(c *ishell.Context) {
+				flagSet := flag.NewFlagSet("getRLPEncodedBlockByNumber", flag.ContinueOnError)
+				clientName := flagSet.String("client", "", "Name of client to send request to")
+				number := flagSet.String("height", "", "Block height")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 2 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Networks[*clientName]; !ok {
+						c.Println(fmt.Sprintf("Client %s not recognised. Please use addClient to add a new connected client first or specify a correct Client name.", *clientName))
+						return
+					}
+					client := session.Networks[*clientName]
+
+					block, _, err := core.GetBlockByNumber(client, *number)
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					encodedBlock, err := core.RlpEncode(block)
+					if err != nil {
+						c.Println(err)
+						return
+					}
+					c.Printf("Encoded Block: \n%+x\n", encodedBlock)
+				} else {
+					c.Println(err.Error())
+				}
+
+				c.Println("===============================================================")
+			},
+		},
+		{
+			Name: "getProof",
+			Help: "use: \tgetProof -client -txhash \n\t\t\t\tdescription: Returns an RLP-encoded set of merkle proofs of a specific transaction and its receipt in a block",
+			Func: func(c *ishell.Context) {
+				flagSet := flag.NewFlagSet("getProof", flag.ContinueOnError)
+				clientName := flagSet.String("client", "", "Name of client to send request to")
+				hash := flagSet.String("txhash", "", "Transaction hash of transaction to be proven")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 2 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Networks[*clientName]; !ok {
+						c.Println(fmt.Sprintf("Client %s not recognised. Please use addClient to add a new connected client first or specify a correct Client name.", *clientName))
+						return
+					}
+					client := session.Networks[*clientName]
+
+					proof, err := core.GetProof(client, *hash)
+					if err != nil {
+						c.Println(err.Error())
+						return
+					}
+
+					c.Printf("Proof: \n0x%x\n", proof)
+				} else {
+					c.Println(err.Error())
+				}
 				c.Println("===============================================================")
 			},
 		},

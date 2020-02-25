@@ -81,7 +81,7 @@ func GetTransactionByHash(eth *EthClient, hash string) (*types.Transaction, []by
 	return tx, t, nil
 }
 
-func GetProof(eth *EthClient, transactionHash string) {
+func GetProof(eth *EthClient, transactionHash string) ([]byte, error) {
 	// Get the transaction hash
 	bytesTxHash := common.HexToHash(transactionHash)
 
@@ -93,7 +93,7 @@ func GetProof(eth *EthClient, transactionHash string) {
 	)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	//fmt.Printf( "Path:           0x%x\n" +
@@ -102,7 +102,7 @@ func GetProof(eth *EthClient, transactionHash string) {
 	//            "ReceiptValue:   0x%x\n" +
 	//            "ReceiptNodes:   0x%x\n", txPath, txValue, txNodes, receiptValue, receiptNodes)
 
-	fmt.Printf("Proof: 0x%x\n", proof)
+	return proof, nil
 }
 
 func RlpEncodeClique(blockHeader *types.Header) (rlpSignedBlock []byte, rlpUnsignedBlock []byte) {
