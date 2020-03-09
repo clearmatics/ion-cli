@@ -13,11 +13,8 @@ var versionCmd = &cobra.Command{
 		// TODO set it dynamic
 		fmt.Println("versin called ")
 
-		if Session.IsSet("rpc-to") {
-			fmt.Println("Using session configs", Session.Get("rpc-to"))
-		} else {
-			fmt.Println("Using default configs:", Configs.Get("rpc-to"))
-		}
+
+		fmt.Println("Using default configs:", Configs.Get("rpc-to"))
 	},
 }
 

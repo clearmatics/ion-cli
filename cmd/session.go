@@ -18,16 +18,7 @@ var (
 
 			// TODO we could have flags similar to the truffle configs indicating what part of the more general configs to use
 
-			// initialize new viper config object called session that would be checked against by commands
-			// in order to understand whether to read from default configs or from session
-			// configs should never store in transit data (from a call needed into another)
-			// session should store the configs plus the transit data
 
-			Session.SetConfigFile(path)
-			err := Session.ReadInConfig()
-			if err != nil {
-				panic(fmt.Errorf("Fatal error session file: %s \n", err))
-			}
 
 			fmt.Println("Using session configs from now on..")
 		},
@@ -37,9 +28,6 @@ var (
 func init() {
 	fmt.Println("session init called")
 
-	//rootCmd.AddCommand(sessionCmd)
-	//sessionCmd.AddCommand(versionCmd)
-
-	// TODO id of session file
+	// TODO overrite single flags instead of using file
 	sessionCmd.Flags().StringVarP(&path, "config", "c", "./config/session.json", "Config file to populate the session with")
 }
