@@ -8,5 +8,6 @@ require (
 	github.com/abiosoft/readline v0.0.0-20180607040430-155bce2042db // indirect
 	github.com/ethereum/go-ethereum v1.9.9
 	github.com/flynn-archive/go-shlex v0.0.0-20150515145356-3f9db97f8568 // indirect
+	github.com/spf13/cobra v0.0.6
 	github.com/stretchr/testify v1.4.0
 )
