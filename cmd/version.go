@@ -11,11 +11,19 @@ var versionCmd = &cobra.Command{
 	Short: "Print the version number of Ion",
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO set it dynamic
-		fmt.Println("Ion version 1.0.0")
+		fmt.Println("versin called ")
+
+		if Session.IsSet("rpc-to") {
+			fmt.Println("Using session configs", Session.Get("rpc-to"))
+		} else {
+			fmt.Println("Using default configs:", Configs.Get("rpc-to"))
+		}
 	},
 }
 
 func init(){
+	fmt.Println("version init called")
+
 	// add command to root
-	rootCmd.AddCommand(versionCmd)
+	//rootCmd.AddCommand(versionCmd)
 }
