@@ -33,7 +33,6 @@ var(
 		Long: "Ion is a system and function-agnostic framework for building cross-interacting smart contracts between blockchains and/or systems",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			//fmt.Println("Hi from the ION cli. Type ion-cli help to display the help")
 
 			fmt.Println("root called")
 
@@ -55,8 +54,8 @@ func init(){
 
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-	rootCmd.Flags().StringVarP(&configPath, "config", "c", "./config/test.json", "Config file to populate the session with")
-	rootCmd.Flags().StringVarP(&sessionPath, "sessionF", "s", "./config/session.json", "Session file to populate the session with")
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config/test.json", "Config file to populate the session with")
+	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "s", "./config/session.json", "Session file to populate the session with")
 
 	// choose config
 	initConfig(sessionPath, configPath)
@@ -74,8 +73,6 @@ func initConfig(sessionPath string, configPath string) {
 
 	// TODO use verbose to determine log
 	// TODO unit test
-
-	fmt.Println(session)
 
 	if int(time.Now().Unix()) - session.Timestamp < timeoutSec  {
 		viper.SetConfigFile(sessionPath)
@@ -97,6 +94,7 @@ func initConfig(sessionPath string, configPath string) {
 		fmt.Println("Overriding with session configs")
 	} else {
 		fmt.Println("Using default configs")
+
 		viper.SetConfigFile(configPath)
 	}
 

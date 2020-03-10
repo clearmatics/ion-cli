@@ -1,14 +1,17 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/cobra"
+	"io/ioutil"
+	"time"
 )
 
 // sessionCmd represents the session command
 var (
 
-	path string
+	deleteSession bool
 
 	sessionCmd = &cobra.Command{
 		Use:   "session",
@@ -17,10 +20,28 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 
 			// TODO we could have flags similar to the truffle configs indicating what part of the more general configs to use
+			if deleteSession {
 
+				// delete the session
+				session.Active = false
+				session.Timestamp = 0
 
+				err := persistSession(session, sessionPath)
+				if err == nil {
+					fmt.Println("Session deleted..")
+				}
 
-			fmt.Println("Using session configs from now on..")
+			} else {
+
+				// create a new session
+				session.Active = true
+				session.Timestamp = int(time.Now().Unix())
+
+				err := persistSession(session, sessionPath)
+				if err == nil {
+					fmt.Println("Session created..")
+				}
+			}
 		},
 	}
 )
@@ -28,6 +49,22 @@ var (
 func init() {
 	fmt.Println("session init called")
 
-	// TODO overrite single flags instead of using file
-	sessionCmd.Flags().StringVarP(&path, "config", "c", "./config/session.json", "Config file to populate the session with")
+	// TODO override single flags instead of using file
+	sessionCmd.Flags().BoolVarP(&deleteSession, "delete", "d", false, "Delete the current session")
+}
+
+func persistSession(session Session, path string) error {
+	b, err := json.Marshal(session)
+	if err != nil {
+		fmt.Errorf("error marshaling the session object")
+		return err
+	}
+
+	err = ioutil.WriteFile(path, b, 0644)
+	if err != nil {
+		fmt.Errorf("error updating the session file")
+		return err
+	}
+
+	return nil
 }
