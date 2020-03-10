@@ -1,4 +1,4 @@
-package core
+package utils
 
 import (
 	"errors"
@@ -12,26 +12,7 @@ import (
 	"strings"
 )
 
-const defaultSolidityVersion = "0.5.12" // Match Ion Release contract versions
-
-func (session *Session) RemoveAllCompilers() {
-	for _, compiler := range session.Compilers {
-		DestroyTempFile(compiler)
-	}
-}
-
-func (session *Session) AddCompilerIfNotExists(version string) error {
-	if _, ok := session.Compilers[version]; !ok {
-		fmt.Printf("Compiler for version %s does not exist\n", version)
-		solc, err := GetSolidityCompilerVersion(version)
-		if err != nil {
-			return err
-		}
-
-		session.Compilers[version] = solc.Name()
-	}
-	return nil
-}
+const DefaultSolidityVersion = "0.5.12" // Match Ion Release contract versions
 
 // Hacky way to find correct contract version
 // Attempts to compile using default solc version and parses solc error to retrieve correct version
@@ -80,7 +61,7 @@ func GetDefaultSolidityCompiler() (*os.File, error) {
 	case "darwin":
 		return nil, nil
 	case "linux":
-		return getSolidityCompilerLinux(defaultSolidityVersion)
+		return GetSolidityCompilerLinux(DefaultSolidityVersion)
 	}
 
 	return nil, nil
@@ -92,13 +73,13 @@ func GetSolidityCompilerVersion(version string) (*os.File, error) {
 		return nil, nil
 	case "linux":
 		fmt.Printf("System is Linux\n")
-		return getSolidityCompilerLinux(version)
+		return GetSolidityCompilerLinux(version)
 	}
 
 	return nil, nil
 }
 
-func getSolidityCompilerLinux(version string) (*os.File, error) {
+func GetSolidityCompilerLinux(version string) (*os.File, error) {
 	fmt.Printf("Getting Solidity compiler for version %s\n", version)
 	url := fmt.Sprintf("https://github.com/ethereum/solidity/releases/download/v%s/solc-static-linux", version)
 

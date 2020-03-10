@@ -48,7 +48,7 @@ func Launch(setup *config.Setup) {
 
 		// Compile and add all contract instances to memory
 		for _, configContract := range setup.Contracts {
-			compiledContract, err := core.CompileContract(session, configContract.File)
+			compiledContract, err := core.AddCompilerAndCompileContract(session, configContract.File)
 			if err != nil {
 				fmt.Printf("Setup Failed: Compiling contract %s from configuration failed: %s", configContract.Name, err.Error())
 				return
