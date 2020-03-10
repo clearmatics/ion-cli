@@ -69,7 +69,11 @@ func Launch(setup *config.Setup) {
 	}
 
 	// Add commands
-	for _, command := range cmd.CoreCommands(shell, session) {
+	for _, command := range cmd.CoreCommands(session) {
+		shell.AddCmd(command)
+	}
+
+	for _, command := range cmd.CliqueCommands(session) {
 		shell.AddCmd(command)
 	}
 

@@ -18,7 +18,7 @@ import (
 	"strings"
 )
 
-func CoreCommands(shell *ishell.Shell, session *core.Session) []*ishell.Cmd {
+func CoreCommands(session *core.Session) []*ishell.Cmd {
 	return []*ishell.Cmd{
 		{
 			Name: "addClient",
