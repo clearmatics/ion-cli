@@ -33,10 +33,10 @@ func Test_ConvertBool(t *testing.T) {
 
 	input := "false"
 	result, err := utils.ApplySolidityType(input, expectedType)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Bool", result)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 }
 
@@ -46,10 +46,10 @@ func Test_ConvertBoolArray(t *testing.T) {
 
 	input := "false,false,true"
 	result, err := utils.ApplySolidityType(input, expectedType)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Bools", result)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 }
 
 func Test_ConvertBool2Array(t *testing.T) {
@@ -58,10 +58,10 @@ func Test_ConvertBool2Array(t *testing.T) {
 
 	input := "false,true"
 	result, err := utils.ApplySolidityType(input, expectedType)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Bool2", result)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 }
 
 func Test_ConvertBool4Array(t *testing.T) {
@@ -70,10 +70,10 @@ func Test_ConvertBool4Array(t *testing.T) {
 
 	input := "true,false,false,true"
 	result, err := utils.ApplySolidityType(input, expectedType)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Bool4", result)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 }
 
 func Test_ConvertInt8(t *testing.T) {
@@ -82,15 +82,15 @@ func Test_ConvertInt8(t *testing.T) {
 
 	input := "5"
 	result, err := utils.ApplySolidityType(input, expectedType)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Int8", result)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	// Now test incorrect int type passed
 	expectedType = compiledTestContract.Abi.Methods["Int64"].Inputs.NonIndexed()[0].Type
 	result, err = utils.ApplySolidityType(input, expectedType)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Int8", result)
 	assert.Assert(t, err != nil)
@@ -98,7 +98,7 @@ func Test_ConvertInt8(t *testing.T) {
 	// Now test incorrect int type passed again
 	expectedType = compiledTestContract.Abi.Methods["Int32"].Inputs.NonIndexed()[0].Type
 	result, err = utils.ApplySolidityType(input, expectedType)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Int8", result)
 	assert.Assert(t, err != nil)
@@ -107,47 +107,34 @@ func Test_ConvertInt8(t *testing.T) {
 func Test_ConvertInt8Array(t *testing.T) {
 	// All functions have a single non indexed input arg
 	expectedType := compiledTestContract.Abi.Methods["Int8s"].Inputs.NonIndexed()[0].Type
-	expectedResult := []int8{5, 6, 7}
 
 	input := "5,6,7"
 
-	iresult, err := utils.ApplySolidityType(input, expectedType)
-	result := iresult.([]int8)
-
-	assert.Assert(t, err == nil)
-	for index := range expectedResult {
-		assert.Equal(t, result[index], expectedResult[index])
-	}
+	result, err := utils.ApplySolidityType(input, expectedType)
+	_, err = compiledTestContract.Abi.Pack("Int8s", result)
+	assert.NilError(t, err)
 }
 
 func Test_ConvertInt8_2Array(t *testing.T) {
 	// All functions have a single non indexed input arg
 	expectedType := compiledTestContract.Abi.Methods["Int8_2"].Inputs.NonIndexed()[0].Type
-	expectedResult := [2]int8{5, 6}
 
 	input := "5,6"
 
-	iresult, err := utils.ApplySolidityType(input, expectedType)
-	result := iresult.([]int8)
-	assert.Assert(t, err == nil)
-	for index := range expectedResult {
-		assert.Equal(t, result[index], expectedResult[index])
-	}
+	result, err := utils.ApplySolidityType(input, expectedType)
+	_, err = compiledTestContract.Abi.Pack("Int8_2", result)
+	assert.NilError(t, err)
 }
 
 func Test_ConvertInt8_4Array(t *testing.T) {
 	// All functions have a single non indexed input arg
 	expectedType := compiledTestContract.Abi.Methods["Int8_4"].Inputs.NonIndexed()[0].Type
-	expectedResult := [4]int8{5, 6, 7, 8}
 
 	input := "5,6,7,8"
 
-	iresult, err := utils.ApplySolidityType(input, expectedType)
-	result := iresult.([]int8)
-	assert.Assert(t, err == nil)
-	for index := range expectedResult {
-		assert.Equal(t, result[index], expectedResult[index])
-	}
+	result, err := utils.ApplySolidityType(input, expectedType)
+	_, err = compiledTestContract.Abi.Pack("Int8_4", result)
+	assert.NilError(t, err)
 }
 
 func Test_ConvertBytes8(t *testing.T) {
@@ -159,7 +146,7 @@ func Test_ConvertBytes8(t *testing.T) {
 
 	result, err := utils.ApplySolidityType(input, expectedType)
 	assert.Equal(t, result, expectedResult)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 }
 
 func Test_ConvertBytes32(t *testing.T) {
@@ -171,7 +158,7 @@ func Test_ConvertBytes32(t *testing.T) {
 
 	result, err := utils.ApplySolidityType(input, expectedType)
 	assert.Equal(t, result, expectedResult)
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 }
 
 //func Test_ConvertToTypeString(t *testing.T) {
@@ -195,7 +182,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeBool(t *testing.T) {
@@ -219,7 +206,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeInt8(t *testing.T) {
@@ -243,7 +230,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeInt16(t *testing.T) {
@@ -267,7 +254,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeInt32(t *testing.T) {
@@ -291,7 +278,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeInt64(t *testing.T) {
@@ -315,7 +302,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeUint8(t *testing.T) {
@@ -339,7 +326,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeUint16(t *testing.T) {
@@ -363,7 +350,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeUint32(t *testing.T) {
@@ -387,7 +374,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeUint64(t *testing.T) {
@@ -411,7 +398,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeInt(t *testing.T) {
@@ -435,7 +422,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 //
 //func Test_ConvertToTypeAddress(t *testing.T) {
@@ -459,7 +446,7 @@ func Test_ConvertBytes32(t *testing.T) {
 //
 //	result, err := utils.ApplySolidityType(input, expectedType.Type)
 //	assert.Equal(t, result, expectedResult)
-//	assert.Assert(t, err == nil)
+//	assert.NilError(t, err)
 //}
 
 func compileTestContract() (*contract.ContractInstance, error) {

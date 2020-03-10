@@ -3,17 +3,9 @@ package cli
 
 import (
 	"fmt"
+	"github.com/abiosoft/ishell"
 	"github.com/clearmatics/ion-cli/cli/cmd"
 	"github.com/clearmatics/ion-cli/cli/core"
-	//"math/big"
-	//"strconv"
-	//"strings"
-	//
-	//"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	//"github.com/ethereum/go-ethereum/common"
-
-	"github.com/abiosoft/ishell"
-
 	"github.com/clearmatics/ion-cli/config"
 )
 
@@ -29,10 +21,6 @@ func printWelcome() {
 func Launch(setup *config.Setup) {
 	// by default, new shell includes 'exit', 'help' and 'clear' commands.
 	shell := ishell.New()
-
-	// Create new context
-	//ctx := context.Background()
-
 	session := core.InitSession()
 
 	if setup != nil {

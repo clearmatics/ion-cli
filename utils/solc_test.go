@@ -15,13 +15,11 @@ const badTestContractCode = "pragma solidity ^0.4.12contract Contract{}"
 
 func Test_GetDefaultSolidityCompiler(t *testing.T) {
 	file, err := utils.GetDefaultSolidityCompiler()
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NilError(t, err)
 	defer utils.DestroyTempFile(file.Name())
 
 	solidity, err := compiler.SolidityVersion(file.Name())
-	assert.Equal(t, err, nil)
+	assert.NilError(t, err)
 	assert.Assert(t, solidity != nil)
 
 	assert.Equal(t, solidity.Version, utils.DefaultSolidityVersion)
@@ -29,44 +27,35 @@ func Test_GetDefaultSolidityCompiler(t *testing.T) {
 
 func Test_GetVersionedSolidityCompilerFromContract(t *testing.T) {
 	file, err := HelperWritetemptestcontract(testContractCode)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NilError(t, err)
 	defer utils.DestroyTempFile(file.Name())
-	assert.Assert(t, err == nil)
 
 	version, err := utils.GetSolidityContractVersion(file.Name())
-	assert.Assert(t, err == nil)
+	assert.NilError(t, err)
 	assert.Equal(t, version, "0.4.12")
 
 	solc, err := utils.GetSolidityCompilerLinux(version)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NilError(t, err)
 	defer utils.DestroyTempFile(solc.Name())
 
 	solidity, err := compiler.SolidityVersion(solc.Name())
-	assert.Equal(t, err, nil)
+	assert.NilError(t, err)
 	assert.Assert(t, solidity != nil)
 	assert.Equal(t, solidity.Version, version)
 
 	compiledContract, err := contract.CompileContractAt(file.Name(), solc.Name())
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NilError(t, err)
 	assert.Assert(t, compiledContract != nil)
 	assert.Equal(t, compiledContract.Info.LanguageVersion, "0.4.12")
 	assert.Equal(t, compiledContract.Info.CompilerVersion, "0.4.12")
 
 	file, err = HelperWritetemptestcontract(badTestContractCode)
-	if err != nil {
-		t.Error(err)
-	}
+	assert.NilError(t, err)
 	defer utils.DestroyTempFile(file.Name())
 
 	version, err = utils.GetSolidityContractVersion(file.Name())
 	assert.Assert(t, version == "")
-	assert.Assert(t, err != nil)
+	assert.NilError(t, err)
 }
 
 func HelperWritetemptestcontract(code string) (*os.File, error) {

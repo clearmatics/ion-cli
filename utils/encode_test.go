@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/clearmatics/ion-cli/utils"
-	"github.com/stretchr/testify/assert"
+	"gotest.tools/assert"
 )
 
 var EXPECTEDRLPBLOCK = "f90256a06341fd3daf94b748c72ced5a5b26028f2474f5f00d824504e4fa37a75767e177a01dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347940000000000000000000000000000000000000000a053580584816f617295ea26c0e17641e0120cab2f0a8ffb53a866fd53aa8e8c2da056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421a056e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421b901000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000002018347c94c808458ee45dab861d783010600846765746887676f312e372e33856c696e757800000000000000009f1efa1efa72af138c915966c639544a0255e6288e188c22ce9168c10dbe46da3d88b4aa065930119fb886210bf01a084fde5d3bc48d8aa38bca92e4fcc5215100a00000000000000000000000000000000000000000000000000000000000000000880000000000000000"
@@ -55,9 +55,7 @@ var FakeBlock = types.Header{
 // EncodePrefix calculate prefix of the entire signed block
 func Test_EncodePrefix(t *testing.T) {
 	prefix, err := utils.EncodePrefix(TestBlock)
-	if err != nil {
-		t.Error(err.Error())
-	}
+	assert.NilError(t, err)
 
 	assert.Equal(t, "\x02\x14", string(prefix))
 }
@@ -65,9 +63,7 @@ func Test_EncodePrefix(t *testing.T) {
 // EncodeExtraData calculate prefix of the extraData field without the signatures
 func Test_EncodeExtraData(t *testing.T) {
 	prefix, err := utils.EncodeExtraData(TestBlock)
-	if err != nil {
-		t.Error(err.Error())
-	}
+	assert.NilError(t, err)
 
 	assert.Equal(t, "\xa0", string(prefix))
 }
@@ -75,9 +71,7 @@ func Test_EncodeExtraData(t *testing.T) {
 // EncodeBlock rlp encodes the martialled JSON struct
 func Test_EncodeBlock(t *testing.T) {
 	rlpBlock, err := rlp.EncodeToBytes(TestBlock)
-	if err != nil {
-		t.Error(err.Error())
-	}
+	assert.NilError(t, err)
 
 	strRlpBlock := hex.EncodeToString(rlpBlock)
 	assert.Equal(t, EXPECTEDRLPBLOCK, strRlpBlock)
@@ -89,7 +83,7 @@ func Test_EncodeSignedBlock(t *testing.T) {
 
 	SignedBlock, err := utils.RlpEncodeBlock(&FakeBlock)
 
-	assert.Equal(t, err, nil)
+	assert.NilError(t, err)
 	assert.Equal(t, ExpectedSignedBytes, SignedBlock)
 }
 
@@ -99,7 +93,7 @@ func Test_EncodeUnsignedBlock(t *testing.T) {
 
 	UnsignedBlock, err := utils.RlpEncodeUnsignedBlock(&FakeBlock)
 
-	assert.Equal(t, err, nil)
+	assert.NilError(t, err)
 	assert.Equal(t, ExpectedUnsignedBytes, UnsignedBlock)
 
 }
