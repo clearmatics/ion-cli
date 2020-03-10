@@ -12,6 +12,7 @@ import (
 type Session struct {
 	Timestamp int `json:"timestamp"`
 	Rpc string `json:"rpc"`
+	Active bool `json:"active"`
 }
 
 
@@ -55,7 +56,7 @@ func init(){
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.Flags().StringVarP(&configPath, "config", "c", "./config/test.json", "Config file to populate the session with")
-	rootCmd.Flags().StringVarP(&sessionPath, "sessionF", "s", "./config/sessions.json", "Session file to populate the session with")
+	rootCmd.Flags().StringVarP(&sessionPath, "sessionF", "s", "./config/session.json", "Session file to populate the session with")
 
 	// choose config
 	initConfig(sessionPath, configPath)
@@ -65,7 +66,7 @@ func init(){
 	rootCmd.AddCommand(sessionCmd)
 }
 
-// choose between session or default configs
+// choose whether to override configs with session fields
 func initConfig(sessionPath string, configPath string) {
 
 	b, _ := ioutil.ReadFile(sessionPath)
@@ -74,8 +75,25 @@ func initConfig(sessionPath string, configPath string) {
 	// TODO use verbose to determine log
 	// TODO unit test
 
+	fmt.Println(session)
+
 	if int(time.Now().Unix()) - session.Timestamp < timeoutSec  {
 		viper.SetConfigFile(sessionPath)
+
+		// update the session
+		session.Active = true
+
+		session.Timestamp = int(time.Now().Unix())
+		b, err := json.Marshal(session)
+		if err != nil {
+			fmt.Errorf("error marshaling the session object")
+		}
+
+		err = ioutil.WriteFile(sessionPath, b, 0644)
+		if err != nil {
+			fmt.Errorf("error updating the session file")
+		}
+
 		fmt.Println("Overriding with session configs")
 	} else {
 		fmt.Println("Using default configs")
