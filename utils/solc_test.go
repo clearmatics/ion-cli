@@ -55,7 +55,7 @@ func Test_GetVersionedSolidityCompilerFromContract(t *testing.T) {
 
 	version, err = utils.GetSolidityContractVersion(file.Name())
 	assert.Assert(t, version == "")
-	assert.NilError(t, err)
+	assert.ErrorContains(t, err, "pragma solidity ^0.4.12contract Contract{}")
 }
 
 func HelperWritetemptestcontract(code string) (*os.File, error) {

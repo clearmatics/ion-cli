@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/abiosoft/ishell"
 	"github.com/clearmatics/ion-cli/cli/cmd"
+	"github.com/clearmatics/ion-cli/cli/cmd/clique"
 	"github.com/clearmatics/ion-cli/cli/core"
 	"github.com/clearmatics/ion-cli/config"
 )
@@ -61,7 +62,7 @@ func Launch(setup *config.Setup) {
 		shell.AddCmd(command)
 	}
 
-	for _, command := range cmd.CliqueCommands(session) {
+	for _, command := range clique.CliqueCommands(session) {
 		shell.AddCmd(command)
 	}
 

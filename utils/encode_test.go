@@ -84,7 +84,7 @@ func Test_EncodeSignedBlock(t *testing.T) {
 	SignedBlock, err := utils.RlpEncodeBlock(&FakeBlock)
 
 	assert.NilError(t, err)
-	assert.Equal(t, ExpectedSignedBytes, SignedBlock)
+	assert.DeepEqual(t, ExpectedSignedBytes, SignedBlock)
 }
 
 func Test_EncodeUnsignedBlock(t *testing.T) {
@@ -94,6 +94,6 @@ func Test_EncodeUnsignedBlock(t *testing.T) {
 	UnsignedBlock, err := utils.RlpEncodeUnsignedBlock(&FakeBlock)
 
 	assert.NilError(t, err)
-	assert.Equal(t, ExpectedUnsignedBytes, UnsignedBlock)
+	assert.DeepEqual(t, ExpectedUnsignedBytes, UnsignedBlock)
 
 }

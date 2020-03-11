@@ -17,6 +17,13 @@ import (
 var NotArrayFormatError = errors.New("expected input as array format: <item>,<item>,<item>,...")
 
 func ApplySolidityType(input string, argType abi.Type) (interface{}, error) {
+
+	fmt.Println("Applying Solidity Type... ")
+	fmt.Println("ArgType: ", argType)
+	fmt.Println("ArgType.Elem: ", argType.Elem)
+	fmt.Println("ArgType.Type: ", argType.Type)
+	fmt.Println("ArgType.Kind: ", argType.Kind)
+	fmt.Println("ArgType.Size: ", argType.Size)
 	if argType.Kind == reflect.Array || argType.Kind == reflect.Slice { // Some solidity array type
 		// bytes = []byte{} argument type = slice, no element, type equates to []uint8
 		// byte[] = [][1]byte{} argument type = slice, element type = array, type equates to [][1]uint8
@@ -25,9 +32,6 @@ func ApplySolidityType(input string, argType abi.Type) (interface{}, error) {
 		// bytesn[] = [][n]byte{} argument type = slice, element type = array, type equates to [][n]uint8
 		// bytesn[m] = [m][n]byte{} argument type = array, element type = array, type equates to [m][n]uint8
 		// Many annoying cases of byte arrays
-
-		fmt.Println(argType)
-		fmt.Println(argType.Elem)
 		if argType.Elem == nil { // One dimensional byte array. Accepts all byte arrays as hex string with pre-pended '0x' only
 			return ConvertOneDimensionalByteArray(input, argType)
 		} else { // Elem has type, could be array of primitives or 2D byte array
@@ -59,27 +63,18 @@ func ConvertOneDimensionalByteArray(input string, argType abi.Type) (interface{}
 }
 
 func ConvertGeneralArray(input string, argType abi.Type) (interface{}, error) {
-	array := strings.Split(input, ",")
-	argSize := argType.Size
-	size := len(array)
-	if argSize != 0 && size != argSize {
-		//c.Printf("Please enter %i comma-separated list of elements:\n", argSize)
-		return nil, NotArrayFormatError
-		//input = c.ReadLine()
-		//array = strings.Split(input, ",")
-		//size = len(array)
-	}
-
 	elementType := argType.Elem
-
-	fmt.Println(elementType)
-	fmt.Println(elementType.Type)
-	fmt.Println(elementType.Kind)
-	fmt.Println(size)
-	fmt.Println(argSize)
+	fmt.Println("ElementType: ", elementType)
+	fmt.Println("ElementType.Type: ", elementType.Type)
+	fmt.Println("ElementType.Kind: ", elementType.Kind)
+	fmt.Println("ElementType.Size: ", elementType.Size)
+	//fmt.Println("Number of inputs: ", size)
+	//fmt.Println("Expected number of inputs: ", argSize)
 
 	// Elements cannot be kind slice                                        only mean slice
-	if elementType.Kind == reflect.Array && elementType.Type != reflect.TypeOf(common.Address{}) {
+	if elementType != nil &&
+		elementType.Kind == reflect.Array &&
+		elementType.Type != reflect.TypeOf(common.Address{}) {
 		// Is 2D byte array
 		/* Nightmare to implement, have to account for:
 		   * Slice of fixed byte arrays; bytes32[] in solidity for example, generally bytesn[]
@@ -93,7 +88,62 @@ func ConvertGeneralArray(input string, argType abi.Type) (interface{}, error) {
 		   implemented it.
 		*/
 
-		return nil, errors.New("2D Arrays unsupported. Use \"bytes\" instead.")
+		if elementType.Size == 1 {
+			/*		Solidity byte[]
+					 	Normal byte array but in the form of []bytes1 = [][1]uint8 which makes it look like 2D array
+
+						Solidity byte[n]
+						Looks like [n]bytes1 = [n][1]uint8. Abi Pack accepts creation of dynamic length array filled to expected length
+			*/
+
+			bytes, err := hex.DecodeString(input[2:])
+			if err != nil {
+				return nil, err
+			}
+
+			var array [][1]uint8
+			for _, item := range bytes {
+				array = append(array, [1]uint8{item})
+			}
+
+			return array, nil
+		} /*else if elementType.Size == 2 {
+			bytes, err := hex.DecodeString(input[2:])
+			if err != nil {
+				return nil, err
+			}
+
+			if len(bytes) % elementType.Size > 0 {
+				return nil, errors.New(fmt.Sprintf("array length mismatch: cannot convert %d bytes to [][%d]byte array, please supply a multiple of %d", len(bytes), elementType.Size, elementType.Size))
+			}
+
+			var array [][]uint8
+			for i := 0; i < len(bytes); i += elementType.Size  {
+				array = append(array, []uint8{bytes[i], bytes[i+1]})
+			}
+
+			return array, nil
+		} else {
+			bytes, err := hex.DecodeString(input[2:])
+			if err != nil {
+				return nil, err
+			}
+
+			if len(bytes) % elementType.Size > 0 {
+				return nil, errors.New(fmt.Sprintf("array length mismatch: cannot convert %d bytes to [][%d]byte array, please supply a multiple of %d", len(bytes), elementType.Size, elementType.Size))
+			}
+
+			var array []interface{}
+
+			for i := 0; i < len(bytes); i += elementType.Size {
+				subarray := makeDynamicSubArray(bytes, elementType.Size, i)
+				array = append(array, subarray)
+			}
+
+			return array, nil
+		} */
+
+		return nil, errors.New("2d arrays unsupported, use \"bytes\" instead")
 
 		/*
 		   slice := make([]interface{}, 0, size)
@@ -105,6 +155,14 @@ func ConvertGeneralArray(input string, argType abi.Type) (interface{}, error) {
 		   continue
 		*/
 	} else {
+
+		array := strings.Split(input, ",")
+		argSize := argType.Size
+		size := len(array)
+		if argSize != 0 && size != argSize {
+			return nil, NotArrayFormatError
+		}
+
 		switch elementType.Type {
 		case reflect.TypeOf(false):
 			convertedArray := make([]bool, 0, size)
@@ -212,6 +270,12 @@ func ConvertGeneralArray(input string, argType abi.Type) (interface{}, error) {
 			for _, item := range array {
 				a := common.HexToAddress(item)
 				convertedArray = append(convertedArray, a)
+			}
+			return convertedArray, nil
+		case reflect.TypeOf("String"):
+			convertedArray := make([]string, 0, size)
+			for _, item := range array {
+				convertedArray = append(convertedArray, item)
 			}
 			return convertedArray, nil
 		default:
@@ -379,31 +443,10 @@ func ConvertToType(str string, typ *abi.Type) (interface{}, error) {
 	case reflect.Bool:
 		b, err := ConvertToBool(str)
 		return b, err
-	case reflect.Int8:
-		fmt.Println("Converting to int of size 8")
-		i, err := ConvertToInt(true, 8, str)
-		return int8(i.(int64)), err
-	case reflect.Int16:
-		i, err := ConvertToInt(true, 16, str)
-		return int16(i.(int64)), err
-	case reflect.Int32:
-		i, err := ConvertToInt(true, 32, str)
-		return int32(i.(int64)), err
-	case reflect.Int64:
-		i, err := ConvertToInt(true, 64, str)
-		return i.(int64), err
-	case reflect.Uint8:
-		u, err := ConvertToInt(false, 8, str)
-		return uint8(u.(uint64)), err
-	case reflect.Uint16:
-		u, err := ConvertToInt(false, 16, str)
-		return uint16(u.(uint64)), err
-	case reflect.Uint32:
-		u, err := ConvertToInt(false, 32, str)
-		return uint32(u.(uint64)), err
-	case reflect.Uint64:
-		u, err := ConvertToInt(false, 64, str)
-		return u.(uint64), err
+	case reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		return ConvertToInt(true, typ.Size, str)
+	case reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		return ConvertToInt(false, typ.Size, str)
 	case reflect.Ptr:
 		i, err := ConvertToInt(false, typ.Size, str)
 		return i, err
@@ -421,12 +464,12 @@ func ConvertToType(str string, typ *abi.Type) (interface{}, error) {
 
 func ConvertToInt(signed bool, size int, value string) (interface{}, error) {
 	if size%8 > 0 {
-		return nil, errors.New("Integer is not a multiple of 8")
+		return nil, errors.New("integer is not a multiple of 8")
 	} else if !isGoIntSize(size) {
 		newInt := new(big.Int)
 		newInt, ok := newInt.SetString(value, 10)
 		if !ok {
-			return nil, errors.New("Could not convert string to big.int")
+			return nil, errors.New("could not convert string to big.int")
 		}
 
 		return newInt, nil
@@ -436,15 +479,114 @@ func ConvertToInt(signed bool, size int, value string) (interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			return i, nil
+
+			switch size {
+			case 8:
+				return int8(i), nil
+			case 16:
+				return int16(i), nil
+			case 32:
+				return int32(i), nil
+			case 64:
+				return int64(i), nil
+			}
 		} else {
 			u, err := strconv.ParseUint(value, 10, size)
 			if err != nil {
 				return nil, err
 			}
-			return u, nil
+
+			switch size {
+			case 8:
+				return uint8(u), nil
+			case 16:
+				return uint16(u), nil
+			case 32:
+				return uint32(u), nil
+			case 64:
+				return uint64(u), nil
+			}
 		}
 	}
+
+	return 0, errors.New("integer conversion fatal error")
+}
+
+func makeDynamicArray(bytes [][]byte, superArraySize int, subArraySize int) interface{} {
+	return nil
+}
+
+func makeDynamicSubArray(bytes []byte, size int, index int) interface{} {
+	switch size {
+	case 1:
+		subarray := [1]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 2:
+		subarray := [2]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 3:
+		subarray := [3]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 4:
+		subarray := [4]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 5:
+		subarray := [5]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 6:
+		subarray := [6]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 7:
+		subarray := [7]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 8:
+		subarray := [8]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 9:
+		subarray := [9]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 10:
+		subarray := [10]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	case 11:
+		subarray := [11]uint8{}
+		for j := 0; j < size; j++ {
+			subarray[j] = bytes[index+j]
+		}
+		return subarray
+	}
+
+	return []byte{}
 }
 
 // MUST CHECK RETURNED ERROR ELSE WILL RETURN FALSE FOR ANY ERRONEOUS INPUT
