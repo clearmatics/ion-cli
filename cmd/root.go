@@ -5,25 +5,20 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/clearmatics/ion-cli/backend"
 	"io/ioutil"
 	"time"
 )
 
-type Session struct {
-	Timestamp int `json:"timestamp"`
-	Rpc string `json:"rpc"`
-	Active bool `json:"active"`
-}
-
-
+// TODO add log with verbosity level
+// TODO we might move also root configs command to backend
 var(
 	// flags can be persistent or local - more down below
 	Verbose bool
-	Configs *viper.Viper
 
 	sessionPath string
 	configPath string
-	session Session
+	session *backend.Session
 
 	timeoutSec =  3600
 
@@ -34,8 +29,6 @@ var(
 
 		Run: func(cmd *cobra.Command, args []string) {
 
-			fmt.Println("root called")
-
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			// this to validate positional arguments
@@ -45,12 +38,11 @@ var(
 )
 
 func Execute() {
-	// start the app
+	// start the cli app
 	rootCmd.Execute()
 }
 
 func init(){
-	fmt.Println("root init called")
 
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
@@ -60,9 +52,6 @@ func init(){
 	// choose config
 	initConfig(sessionPath, configPath)
 
-	// add all commands
-	rootCmd.AddCommand(versionCmd)
-	rootCmd.AddCommand(sessionCmd)
 }
 
 // choose whether to override configs with session fields
@@ -71,27 +60,19 @@ func initConfig(sessionPath string, configPath string) {
 	b, _ := ioutil.ReadFile(sessionPath)
 	json.Unmarshal(b, &session)
 
-	// TODO use verbose to determine log
-	// TODO unit test
-
 	if int(time.Now().Unix()) - session.Timestamp < timeoutSec  {
-		viper.SetConfigFile(sessionPath)
-
 		// update the session
 		session.Active = true
-
 		session.Timestamp = int(time.Now().Unix())
-		b, err := json.Marshal(session)
+
+		err := session.PersistSession(sessionPath)
 		if err != nil {
-			fmt.Errorf("error marshaling the session object")
+			fmt.Println(err)
+		} else {
+			viper.SetConfigFile(sessionPath)
+			fmt.Println("Using session configs")
 		}
 
-		err = ioutil.WriteFile(sessionPath, b, 0644)
-		if err != nil {
-			fmt.Errorf("error updating the session file")
-		}
-
-		fmt.Println("Overriding with session configs")
 	} else {
 		fmt.Println("Using default configs")
 
