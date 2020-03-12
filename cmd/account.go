@@ -18,7 +18,7 @@ var (
 		Long: `Manage the accounts you will use to interact with the ION smart contracts`,
 		Run: func(cmd *cobra.Command, args []string) {
 
-			fmt.Print("I will list your accounts when god will tell me how..")
+			fmt.Print("I will list your accounts when god will teach me how..")
 		},
 	}
 
@@ -50,13 +50,13 @@ var (
 func init() {
 
 	// init sub commands
-	initAdd()
+	initAddAccount()
 
 	rootCmd.AddCommand(accountCmd)
 	accountCmd.AddCommand(addAccountCmd)
 }
 
-func initAdd() {
+func initAddAccount() {
 	addAccountCmd.Flags().StringVarP(&accountName, "name", "n", "", "The name of the account")
 	addAccountCmd.Flags().StringVarP(&keyFile, "keyfile", "k", "", "The path to the keyfile")
 	addAccountCmd.Flags().StringVarP(&password, "pwd", "p", "", "The password to unlock the account")
