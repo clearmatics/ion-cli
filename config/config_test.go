@@ -31,13 +31,26 @@ func Test_InitUser(t *testing.T) {
 	expectedFrom := common.HexToAddress("2be5ab0e43b6dc2908d5321cf318f35b80d0c10d")
 	expectedPrivateKey := "e176c157b5ae6413726c23094bb82198eb283030409624965231606ec0fbe65b"
 
-	auth, userkey, err := config.InitUser(keystore, password)
+	user, err := config.InitUser(keystore, password)
 	assert.Equal(t, err, nil)
 
-	assert.Equal(t, auth.From, expectedFrom)
-	privateKey := fmt.Sprintf("%x", crypto.FromECDSA(userkey.PrivateKey))
+	assert.Equal(t, user.Auth.From, expectedFrom)
+	privateKey := fmt.Sprintf("%x", crypto.FromECDSA(user.Key.PrivateKey))
 	assert.Equal(t, privateKey, expectedPrivateKey)
 
+}
+
+func Test_ReadConfig(t *testing.T) {
+	configuration := "configtest.json"
+
+	expectedAccounts := []config.ConfigAccount{{"me", "keystore/UTC--2018-11-14T13-34-31.599642840Z--b8844cf76df596e746f360957aa3af954ef51605", "test"}}
+	expectedContracts := []config.ConfigContracts{{"ion", "contracts/Ion.sol"}}
+
+	setup, err := config.ReadSetup(configuration)
+	assert.Equal(t, err, nil)
+
+	assert.Equal(t, setup.Accounts, expectedAccounts)
+	assert.Equal(t, setup.Contracts, expectedContracts)
 }
 
 func findPath() string {

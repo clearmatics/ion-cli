@@ -1,5 +1,5 @@
 // Copyright (c) 2018 Clearmatics Technologies Ltd
-package contract
+package contracts
 
 import (
 	"context"
@@ -26,6 +26,8 @@ type ContractInstance struct {
 	Contract *compiler.Contract
 	Abi      *abi.ABI
 	Path     string
+	AbiStr   string
+	BinStr   string
 }
 
 // GENERIC UTIL FUNCTIONS
@@ -41,18 +43,18 @@ func GetContractBytecodeAndABI(c *compiler.Contract) (string, string) {
 	return contractBinStr, contractABIStr
 }
 
-func generateContractPayload(contractBinStr string, contractABIStr string, constructorArgs ...interface{}) []byte {
+func generateContractPayload(contractBinStr string, contractABIStr string, constructorArgs ...interface{}) ([]byte, error) {
 	bytecode := common.Hex2Bytes(contractBinStr)
 	abiContract, err := abi.JSON(strings.NewReader(contractABIStr))
 	if err != nil {
-		log.Fatal("ERROR reading contract ABI ", err)
+		return nil, err
 	}
 	packedABI, err := abiContract.Pack("", constructorArgs...)
 	if err != nil {
-		log.Fatal("ERROR packing ABI ", err)
+		return nil, err
 	}
 	payloadBytecode := append(bytecode, packedABI...)
-	return payloadBytecode
+	return payloadBytecode, nil
 }
 
 func newTx(
@@ -117,7 +119,7 @@ func CompilePayload(
 	binStr string,
 	abiStr string,
 	constructorArgs ...interface{},
-) []byte {
+) ([]byte, error) {
 	return generateContractPayload(binStr, abiStr, constructorArgs...)
 }
 
@@ -158,8 +160,8 @@ func CallContract(
 	return out, nil
 }
 
-// TransactionContract execute function in contract
-func TransactionContract(
+// FunctionCallTransaction execute function in contract
+func FunctionCallTransaction(
 	ctx context.Context,
 	backend bind.ContractBackend,
 	userKey *ecdsa.PrivateKey,
@@ -225,47 +227,56 @@ func CompileContract(contract string) (compiledContract *compiler.Contract, err 
 	return compiledContract, nil
 }
 
-func CompileContractAt(contractPath string) (compiledContract *compiler.Contract, err error) {
+func CompileContractAt(contractPath string, solc string) (compiledContract *compiler.Contract, err error) {
 	path := strings.Split(contractPath, "/")
-	contractName := path[len(path)-1]
 	contractFolder := path[len(path)-2]
+	contractFile := path[len(path)-1]
 
 	i := strings.Index(contractPath, contractFolder)
 	remapping := fmt.Sprintf("../=%s", contractPath[:i])
 
-	contract, err := compiler.CompileSolidity("", []string{remapping}, contractPath)
+	contract, err := compiler.CompileSolidity(solc, []string{remapping}, contractPath)
 	if err != nil {
 		return nil, err
 	}
 
-	compiledContract = contract[contractPath+":"+strings.Replace(contractName, ".sol", "", -1)]
+	for key := range contract {
+		if strings.Contains(key, contractFile) {
+			return contract[key], nil
+		}
+	}
 
-	return compiledContract, nil
+	return nil, errors.New("compiled contract contains no data")
 }
 
-func CompileContractWithLibraries(contractPath string, libraries map[string]common.Address) (compiledContract *compiler.Contract, err error) {
+func CompileContractWithLibraries(contractPath string, libraries map[string]common.Address, solc string) (compiledContract *compiler.Contract, err error) {
 	path := strings.Split(contractPath, "/")
-	contractName := path[len(path)-1]
 	contractFolder := path[len(path)-2]
+	contractFile := path[len(path)-1]
 
-	args := []string{}
+	var args []string
 
-	for name := range libraries {
-		address := libraries[name]
-
+	// Add libraries to args
+	for name, address := range libraries {
 		libraryArg := name + ":" + address.String()
 		args = append(args, fmt.Sprintf("--libraries=%s", libraryArg))
 	}
 
+	// Add remapping values to args
 	i := strings.Index(contractPath, contractFolder)
 	args = append(args, fmt.Sprintf("../=%s ", contractPath[:i]))
 
-	contract, err := compiler.CompileSolidity("", args, contractPath)
+	contract, err := compiler.CompileSolidity(solc, args, contractPath)
 	if err != nil {
 		return nil, err
 	}
 
-	compiledContract = contract[contractPath+":"+strings.Replace(contractName, ".sol", "", -1)]
+	for key := range contract {
+		if strings.Contains(key, contractFile) {
+			return contract[key], nil
+		}
+	}
 
-	return compiledContract, nil
+	return nil, errors.New("compiled contract contains no data")
+
 }

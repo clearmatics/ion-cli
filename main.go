@@ -9,4 +9,5 @@ import (
 func main() {
 	// Launch the CLI
 	cmd.Execute()
+
 }

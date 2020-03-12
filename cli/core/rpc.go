@@ -1,5 +1,5 @@
 // Copyright (c) 2018 Clearmatics Technologies Ltd
-package cli
+package core
 
 import (
 	"context"
@@ -12,9 +12,7 @@ import (
 	"github.com/clearmatics/ion-cli/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/rpc"
 )
 
 // Header used to marshall blocks into a string based struct
@@ -36,18 +34,12 @@ type header struct {
 	Nonce       string `json:"nonce"`
 }
 
-type EthClient struct {
-	client    *ethclient.Client
-	rpcClient *rpc.Client
-	url       string
-}
-
-func getBlockByNumber(eth *EthClient, number string) (*types.Header, []byte, error) {
+func GetBlockByNumber(eth *EthClient, number string) (*types.Header, []byte, error) {
 	// var blockHeader header
 	blockNum := new(big.Int)
 	blockNum.SetString(number, 10)
 
-	block, err := eth.client.HeaderByNumber(context.Background(), blockNum)
+	block, err := eth.Client.HeaderByNumber(context.Background(), blockNum)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -59,10 +51,10 @@ func getBlockByNumber(eth *EthClient, number string) (*types.Header, []byte, err
 	return block, b, nil
 }
 
-func getBlockByHash(eth *EthClient, hash string) (*types.Header, []byte, error) {
+func GetBlockByHash(eth *EthClient, hash string) (*types.Header, []byte, error) {
 	blockHash := common.HexToHash(hash)
 
-	block, err := eth.client.HeaderByHash(context.Background(), blockHash)
+	block, err := eth.Client.HeaderByHash(context.Background(), blockHash)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -74,10 +66,10 @@ func getBlockByHash(eth *EthClient, hash string) (*types.Header, []byte, error) 
 	return block, b, nil
 }
 
-func getTransactionByHash(eth *EthClient, hash string) (*types.Transaction, []byte, error) {
+func GetTransactionByHash(eth *EthClient, hash string) (*types.Transaction, []byte, error) {
 	txHash := common.HexToHash(hash)
 
-	tx, _, err := eth.client.TransactionByHash(context.Background(), txHash)
+	tx, _, err := eth.Client.TransactionByHash(context.Background(), txHash)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -89,19 +81,19 @@ func getTransactionByHash(eth *EthClient, hash string) (*types.Transaction, []by
 	return tx, t, nil
 }
 
-func getProof(eth *EthClient, transactionHash string) {
+func GetProof(eth *EthClient, transactionHash string) ([]byte, error) {
 	// Get the transaction hash
 	bytesTxHash := common.HexToHash(transactionHash)
 
 	// Generate the proof
 	proof, err := utils.GenerateProof(
 		context.Background(),
-		eth.rpcClient,
+		eth.RpcClient,
 		bytesTxHash,
 	)
 
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	//fmt.Printf( "Path:           0x%x\n" +
@@ -110,7 +102,7 @@ func getProof(eth *EthClient, transactionHash string) {
 	//            "ReceiptValue:   0x%x\n" +
 	//            "ReceiptNodes:   0x%x\n", txPath, txValue, txNodes, receiptValue, receiptNodes)
 
-	fmt.Printf("Proof: 0x%x\n", proof)
+	return proof, nil
 }
 
 func RlpEncodeClique(blockHeader *types.Header) (rlpSignedBlock []byte, rlpUnsignedBlock []byte) {
