@@ -9,10 +9,14 @@ import (
 type Session struct {
 	Timestamp int `json:"timestamp"`
 	// lenght of the session
+
 	// network
 	Rpc string `json:"rpc"`
 	Active bool `json:"active"`
 	AccountName string `json:"account"`
+
+	// fields that have to be cached for subsequent calls
+	Block string `json:"block"`
 }
 
 

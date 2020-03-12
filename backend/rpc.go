@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/clearmatics/ion-cli/utils"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
@@ -33,6 +34,21 @@ func (eth *EthClient) GetBlockByNumber(number string) (*types.Header, []byte, er
 	blockNum.SetString(number, 10)
 
 	block, err := eth.client.HeaderByNumber(context.Background(), blockNum)
+	if err != nil {
+		return nil, nil, err
+	}
+	// Marshal into a JSON
+	b, err := json.MarshalIndent(block, "", " ")
+	if err != nil {
+		return nil, nil, err
+	}
+	return block, b, nil
+}
+
+func (eth *EthClient) GetBlockByHash(hash string) (*types.Header, []byte, error) {
+	blockHash := common.HexToHash(hash)
+
+	block, err := eth.client.HeaderByHash(context.Background(), blockHash)
 	if err != nil {
 		return nil, nil, err
 	}
