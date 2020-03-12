@@ -5,9 +5,9 @@ import (
 	"github.com/spf13/cobra"
 	"time"
 )
-// TODO we could have flags similar to the truffle configs indicating what part of the more general configs to use
 // todo we might restore a session entirely from file
-// TODO override single flags instead of using file
+// TODO override single flags of using file
+// TODO all the flags containing network, account, etc to use
 
 var (
 	deleteSession bool
@@ -29,6 +29,8 @@ var (
 				if err == nil {
 					fmt.Println("Success!")
 				}
+			} else {
+				fmt.Printf("These are the session parameters you are using: \n%+v", *session)
 			}
 		},
 	}
@@ -42,9 +44,8 @@ var (
 			// create a new session
 			session.Active = true
 			session.Timestamp = int(time.Now().Unix())
-			//session.ParseAccount(accountName, configPath)
+			session.AccountName = accountName
 
-			// TODO all the flags containing network, account, etc to use
 			fmt.Println("Creating a new session..")
 
 			err := session.PersistSession(sessionPath)
@@ -59,13 +60,18 @@ func init() {
 	// root command
 	sessionCmd.Flags().BoolVarP(&deleteSession, "delete", "d", false, "Delete the current session")
 
-	// add sub command
-	addSessionCmd.Flags().StringVarP(&accountName, "account", "a", "", "The account name in the config file to use in the session")
-	addSessionCmd.MarkFlagRequired("account")
+	// sub commands
+	initAddCmd()
 
 	// create the tree of commands
 	rootCmd.AddCommand(sessionCmd)
 	sessionCmd.AddCommand(addSessionCmd)
+}
+
+func initAddCmd() {
+	// add sub command
+	addSessionCmd.Flags().StringVarP(&accountName, "account", "a", "", "The account name to use in the session")
+	addSessionCmd.MarkFlagRequired("account")
 }
 
 
