@@ -25,14 +25,27 @@ var (
 
 				fmt.Println("Deleting session..")
 
-			} else {
-
-				// create a new session
-				session.Active = true
-				session.Timestamp = int(time.Now().Unix())
-
-				fmt.Println("Creating a new session..")
+				err := session.PersistSession(sessionPath)
+				if err == nil {
+					fmt.Println("Success!")
+				}
 			}
+		},
+	}
+
+	addSessionCmd = &cobra.Command{
+		Use:   "init",
+		Short: "Add a session within ION",
+		Long: "Allow to create, a session file further calls would read the configs from and populate with needed data for other calls:",
+		Run: func(cmd *cobra.Command, args []string) {
+
+			// create a new session
+			session.Active = true
+			session.Timestamp = int(time.Now().Unix())
+			//session.ParseAccount(accountName, configPath)
+
+			// TODO all the flags containing network, account, etc to use
+			fmt.Println("Creating a new session..")
 
 			err := session.PersistSession(sessionPath)
 			if err == nil {
@@ -43,9 +56,16 @@ var (
 )
 
 func init() {
+	// root command
 	sessionCmd.Flags().BoolVarP(&deleteSession, "delete", "d", false, "Delete the current session")
 
+	// add sub command
+	addSessionCmd.Flags().StringVarP(&accountName, "account", "a", "", "The account name in the config file to use in the session")
+	addSessionCmd.MarkFlagRequired("account")
+
+	// create the tree of commands
 	rootCmd.AddCommand(sessionCmd)
+	sessionCmd.AddCommand(addSessionCmd)
 }
 
 
