@@ -2,6 +2,7 @@ package backend
 
 import(
 	"encoding/json"
+	"github.com/clearmatics/ion-cli/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/accounts/keystore"
 	"io/ioutil"
@@ -27,7 +28,7 @@ func InitAccount(name string, keyStore string, password string) (Wallet, error) 
 	}
 
 	// Create an authorized transactor
-	key := ReadString(keyStore)
+	key := utils.ReadString(keyStore)
 	w.Auth, err = bind.NewTransactor(strings.NewReader(key), password)
 	if err != nil {
 		return Wallet{}, err
@@ -55,5 +56,5 @@ func AddAccount(name string, keystore string, password string, accountsPath stri
 	// append this new one
 	accounts = append(accounts, AccountInfo{name, keystore, password})
 
-	return PersistObject(accounts, accountsPath)
+	return utils.PersistObject(accounts, accountsPath)
 }

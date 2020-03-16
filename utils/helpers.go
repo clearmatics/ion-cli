@@ -5,13 +5,44 @@ package utils
 import (
 	"context"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
+
+func PersistObject(obj interface{}, file string) error {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		fmt.Errorf("error marshaling the object")
+		return err
+	}
+
+	err = ioutil.WriteFile(file, b, 0644)
+	if err != nil {
+		fmt.Errorf("error writing to file")
+		return err
+	}
+
+	return nil
+}
+
+// Takes path to a JSON and returns a string of the contents
+func ReadString(path string) (contents string) {
+	raw, err := ioutil.ReadFile(path)
+	if err != nil {
+		fmt.Print(err, "\n")
+	}
+
+	contents = string(raw)
+
+	return
+
+}
 
 func GetNonce(client *ethclient.Client, auth *bind.TransactOpts) {
 	// Find the correct tx nonce

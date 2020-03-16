@@ -4,12 +4,11 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
+	"github.com/clearmatics/ion-cli/utils"
 	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
 )
-
-// TODO getBlock -encoded
 
 var (
 
@@ -43,7 +42,7 @@ var (
 			if rlpEncoded {
 				// cache the rlp encoding of that block in the session
 				fmt.Println("Rlp encoding it..")
-				rlp, err := backend.RlpEncode(session.Block.Header)
+				rlp, err := utils.RlpEncode(session.Block.Header)
 				returnIfError(err)
 
 				session.Block.RlpEncoded = hex.EncodeToString(rlp)
