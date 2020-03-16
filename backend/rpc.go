@@ -68,15 +68,15 @@ func (eth *EthClient) GetTransactionByHash(hash string) (*types.Transaction, []b
 	return tx, t, nil
 }
 
-/*
-func GetProof(eth *EthClient, transactionHash string) ([]byte, error) {
+
+func (eth *EthClient) GetProof(transactionHash string) ([]byte, error) {
 	// Get the transaction hash
 	bytesTxHash := common.HexToHash(transactionHash)
 
 	// Generate the proof
 	proof, err := utils.GenerateProof(
 		context.Background(),
-		eth.RpcClient,
+		eth.rpcClient,
 		bytesTxHash,
 	)
 
@@ -84,11 +84,5 @@ func GetProof(eth *EthClient, transactionHash string) ([]byte, error) {
 		return nil, err
 	}
 
-	//fmt.Printf( "Path:           0x%x\n" +
-	//            "TxValue:        0x%x\n" +
-	//            "TxNodes:        0x%x\n" +
-	//            "ReceiptValue:   0x%x\n" +
-	//            "ReceiptNodes:   0x%x\n", txPath, txValue, txNodes, receiptValue, receiptNodes)
-
 	return proof, nil
-}*/
+}

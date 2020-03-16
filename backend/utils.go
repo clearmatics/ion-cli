@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 )
 
+// TODO might move everything to util folder 
+
 func PersistObject(obj interface{}, file string) error {
 	b, err := json.Marshal(obj)
 	if err != nil {
@@ -24,21 +26,6 @@ func PersistObject(obj interface{}, file string) error {
 	return nil
 }
 
-// Takes path to a JSON and returns a struct of the contents
-//func ReadSetup(config string) (Setup, error) {
-//	setup := Setup{}
-//	raw, err := ioutil.ReadFile(config)
-//	if err != nil {
-//		return setup, err
-//	}
-//
-//	err = json.Unmarshal(raw, &setup)
-//	if err != nil {
-//		return setup, err
-//	}
-//
-//	return setup, nil
-//}
 
 // Takes path to a JSON and returns a string of the contents
 func ReadString(path string) (contents string) {
