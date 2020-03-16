@@ -8,20 +8,6 @@ import(
 	"strings"
 )
 
-// an unlocked wallet object
-type Wallet struct {
-	Auth *bind.TransactOpts `json:"auth"`
-	Key  *keystore.Key `json:"key"`
-	Name string `json:"name"`
-}
-
-// an account info as stored in the configs
-type AccountInfo struct {
-	Name string `json:"name"`
-	Keyfile string `json:"keyfile"`
-	Password string `json:"password"`
-}
-
 var accounts []AccountInfo
 
 // initialize a wallet ready to be used
