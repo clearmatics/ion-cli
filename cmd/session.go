@@ -26,9 +26,10 @@ var (
 				fmt.Println("Deleting session..")
 
 				err := session.PersistSession(sessionPath)
-				if err == nil {
-					fmt.Println("Success!")
-				}
+				returnIfError(err)
+
+				fmt.Println("Success!")
+
 			} else {
 				fmt.Printf("These are the session parameters you are using: \n%+v", *session)
 			}
@@ -49,9 +50,10 @@ var (
 			fmt.Println("Creating a new session..")
 
 			err := session.PersistSession(sessionPath)
-			if err == nil {
-				fmt.Println("Success!")
-			}
+			returnIfError(err)
+
+			fmt.Println("Success!")
+
 		},
 	}
 )

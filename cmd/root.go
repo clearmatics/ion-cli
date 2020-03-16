@@ -86,3 +86,4 @@ func initConfig(sessionPath string, configPath string) {
 
 }
 
+
