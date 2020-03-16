@@ -4,7 +4,6 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/spf13/viper"
 
 	"github.com/spf13/cobra"
@@ -17,9 +16,6 @@ var (
 	blockInfo string // either the hash or the number
 	byHash bool
 	rlpEncoded bool
-	block *types.Header
-	byteBlock []byte
-	sessionBlock backend.BlockHeader
 
 	getBlockCmd = &cobra.Command{
 		Use:   "getBlock",
@@ -32,30 +28,29 @@ var (
 			eth, err := backend.GetClient(viper.GetString("rpc"))
 			returnIfError(err)
 
+			// assign the block to session object
 			if !byHash {
 				fmt.Printf("Retrieving block by number: %v\n", blockInfo)
-				block, byteBlock, err = eth.GetBlockByNumber(blockInfo)
+				session.Block.Header, _, err = eth.GetBlockByNumber(blockInfo)
 				returnIfError(err)
 			} else {
 				fmt.Printf("Retrieving block by hash: %v\n", blockInfo)
-				block, byteBlock, err = eth.GetBlockByHash(blockInfo)
+				session.Block.Header, _, err = eth.GetBlockByHash(blockInfo)
 				returnIfError(err)
 			}
 
-			// cache the block in the session
-			session.Block.Header = block
-
+			// add the rlp encoding if flagged
 			if rlpEncoded {
 				// cache the rlp encoding of that block in the session
 				fmt.Println("Rlp encoding it..")
-				rlp, err := backend.RlpEncode(block)
+				rlp, err := backend.RlpEncode(session.Block.Header)
 				returnIfError(err)
 
 				session.Block.RlpEncoded = hex.EncodeToString(rlp)
 			}
 
 
-			// update the session
+			// update session file
 			returnIfError(session.PersistSession(sessionPath))
 
 			fmt.Println("Success! Session file updated")
