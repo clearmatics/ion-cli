@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -9,14 +10,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO getBlock -number/hash -encoded
+// TODO getBlock -encoded
 
 var (
 
 	blockInfo string // either the hash or the number
-	byHash = false
+	byHash bool
+	rlpEncoded bool
 	block *types.Header
 	byteBlock []byte
+	sessionBlock backend.BlockHeader
 
 	getBlockCmd = &cobra.Command{
 		Use:   "getBlock",
@@ -27,36 +30,46 @@ var (
 			fmt.Println("Connecting to the RPC client..")
 
 			eth, err := backend.GetClient(viper.GetString("rpc"))
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			fmt.Println("Retrieving the block you asked..")
+			returnIfError(err)
 
 			if !byHash {
+				fmt.Printf("Retrieving block by number: %v\n", blockInfo)
 				block, byteBlock, err = eth.GetBlockByNumber(blockInfo)
+				returnIfError(err)
 			} else {
+				fmt.Printf("Retrieving block by hash: %v\n", blockInfo)
 				block, byteBlock, err = eth.GetBlockByHash(blockInfo)
+				returnIfError(err)
 			}
 
-			fmt.Println("Success!", block)
+			// cache the block in the session
+			session.Block.Header = block
 
-			// update the session with what's needed to cache
-			session.Block = string(byteBlock)
-			session.PersistSession(sessionPath)
+			if rlpEncoded {
+				// cache the rlp encoding of that block in the session
+				fmt.Println("Rlp encoding it..")
+				rlp, err := backend.RlpEncode(block)
+				returnIfError(err)
+
+				session.Block.RlpEncoded = hex.EncodeToString(rlp)
+			}
+
+
+			// update the session
+			returnIfError(session.PersistSession(sessionPath))
+
+			fmt.Println("Success! Session file updated")
 		},
 	}
 )
 
 func init() {
 
-	//getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "c", false, "Specify if reading the block by number or by hash")
+	getBlockCmd.Flags().BoolVarP(&rlpEncoded, "rlp", "", false, "Specify if the returned block header should be rlp encoded or not")
+	getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "", false, "Specify if reading the block by number or by hash")
 	getBlockCmd.Flags().StringVarP(&blockInfo, "block", "b", "latest", "Block number or hash")
-
-	getBlockCmd.MarkFlagRequired("block")
 
 	rootCmd.AddCommand(getBlockCmd)
 
-
 }
+

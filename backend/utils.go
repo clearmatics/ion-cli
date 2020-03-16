@@ -3,6 +3,8 @@ package backend
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rlp"
 	"io/ioutil"
 )
 
@@ -49,4 +51,15 @@ func ReadString(path string) (contents string) {
 
 	return
 
+}
+
+// return the rlp encoded form of a block header
+func RlpEncode(blockHeader *types.Header) (rlpBlock []byte, err error) {
+	// Encode the orginal block header
+	rlpBlock, err = rlp.EncodeToBytes(&blockHeader)
+	if err != nil {
+		fmt.Println("can't RLP encode requested block:", err)
+		return
+	}
+	return
 }
