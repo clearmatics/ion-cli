@@ -8,7 +8,6 @@ import (
 	"reflect"
 
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // Header used to marshall blocks into a string based struct
@@ -83,15 +82,4 @@ func EncodeBlock(blockInterface interface{}) (h []byte) {
 	h, _ = rlp.EncodeToBytes(blockInterface)
 
 	return h
-}
-
-// return the rlp encoded form of a block header
-func RlpEncode(blockHeader *types.Header) (rlpBlock []byte, err error) {
-	// Encode the orginal block header
-	rlpBlock, err = rlp.EncodeToBytes(&blockHeader)
-	if err != nil {
-		fmt.Println("can't RLP encode requested block:", err)
-		return
-	}
-	return
 }

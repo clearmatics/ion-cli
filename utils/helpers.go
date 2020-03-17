@@ -16,7 +16,7 @@ import (
 )
 
 func PersistObject(obj interface{}, file string) error {
-	b, err := json.Marshal(obj)
+	b, err := json.MarshalIndent(obj, "", " ")
 	if err != nil {
 		fmt.Errorf("error marshaling the object")
 		return err
