@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO list, remove subcommands
+// TODO remove subcommands
 
 // accountCmd represents the account command
 var (

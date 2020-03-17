@@ -14,6 +14,7 @@ import(
 var accounts []AccountInfo
 
 // initialize a wallet ready to be used
+// TODO to be called with viper account name in use to have a transactor ready
 func InitAccount(name string, keyStore string, password string) (Wallet, error) {
 
 	w := Wallet{}

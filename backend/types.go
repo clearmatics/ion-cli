@@ -7,7 +7,9 @@ import (
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/ethereum/go-ethereum/rpc"
 )
+
 // TODO might need to specify on which consensus
+// TODO the rlp encoded is supposed to be used by ION to submit blocks. how do we identify which block
 type BlockHeader struct {
 	Header *types.Header `json:"header"`
 	RlpEncoded string`json:"rlp_encoded"`
