@@ -3,15 +3,15 @@ package cmd
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/clearmatics/ion-cli/backend"
+	"github.com/clearmatics/ion-cli/utils"
+	"github.com/ethereum/go-ethereum/common"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 // getTransactionCmd represents the getTransaction command
 var (
-
-	txHash string
+	txHash   string
 	getProof bool
 
 	getTransactionCmd = &cobra.Command{
@@ -23,17 +23,22 @@ var (
 
 			fmt.Println("Connecting to the RPC client..")
 
-			eth, err := backend.GetClient(viper.GetString("rpc"))
+			eth, err := utils.Client(viper.GetString("rpc"))
 			returnIfError(err)
 
 			fmt.Println("Calling getTransactionByHash for tx:", txHash)
-			session.Transaction.Tx, _, err = eth.GetTransactionByHash(txHash)
+			hash := common.HexToHash(txHash)
+			session.Transaction.Tx, _, err = utils.GetTransactionByHash(eth, hash)
 			returnIfError(err)
 
 			if getProof {
 				// calculate the merkle proof
+				fmt.Println("Retrieving the merkle data..")
+				data, err := utils.FetchProofData(eth, hash)
+				returnIfError(err)
+
 				fmt.Println("Calculating the merkle proof..")
-				proof, err := eth.GetProof(txHash)
+				proof, err := utils.GenerateIonProof(*data)
 				returnIfError(err)
 
 				session.Transaction.Proof = hex.EncodeToString(proof)

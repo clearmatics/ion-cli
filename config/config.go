@@ -68,6 +68,22 @@ func ReadString(path string) (contents string) {
 	return
 }
 
+func PersistObject(obj interface{}, file string) error {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		fmt.Errorf("error marshaling the object")
+		return err
+	}
+
+	err = ioutil.WriteFile(file, b, 0644)
+	if err != nil {
+		fmt.Errorf("error writing to file")
+		return err
+	}
+
+	return nil
+}
+
 func InitUser(privkeystore string, password string) (user Account, err error) {
 	// retrieve private key
 	keyjson, err := ioutil.ReadFile(privkeystore)
