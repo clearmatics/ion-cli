@@ -7,9 +7,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"math/big"
-	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/Shirikatsu/go-ethereum/common/compiler"
@@ -26,138 +25,66 @@ type ContractInstance struct {
 	Contract *compiler.Contract
 	Abi      *abi.ABI
 	Path     string
-	AbiStr   string
-	BinStr   string
+	Bytecode []byte
 }
 
-// GENERIC UTIL FUNCTIONS
+func GetContractBytecodeAndABI(c *compiler.Contract) ([]byte, *abi.ABI, error) {
+	bytecode := common.FromHex(c.Code)
 
-func GetContractBytecodeAndABI(c *compiler.Contract) (string, string) {
-	cABIBytes, err := json.Marshal(c.Info.AbiDefinition)
+	abiStr, err := json.Marshal(c.Info.AbiDefinition)
 	if err != nil {
-		log.Fatal("ERROR marshalling contract ABI:", err)
+		return []byte{}, nil, err
 	}
 
-	contractBinStr := c.Code[2:]
-	contractABIStr := string(cABIBytes)
-	return contractBinStr, contractABIStr
+	abiObj, err := abi.JSON(strings.NewReader(string(abiStr)))
+	if err != nil {
+		return []byte{}, nil, err
+	}
+
+	return bytecode, &abiObj, nil
 }
 
-func generateContractPayload(contractBinStr string, contractABIStr string, constructorArgs ...interface{}) ([]byte, error) {
-	bytecode := common.Hex2Bytes(contractBinStr)
-	abiContract, err := abi.JSON(strings.NewReader(contractABIStr))
+func CreateTransactionPayload(contract *ContractInstance, methodName string, inputs ...interface{}) ([]byte, error) {
+	payload, err := contract.Abi.Pack(methodName, inputs...)
 	if err != nil {
 		return nil, err
 	}
-	packedABI, err := abiContract.Pack("", constructorArgs...)
-	if err != nil {
-		return nil, err
+
+	// Is constructor, therefore we are deploying a contract
+	if methodName == "" {
+		return append(contract.Bytecode, payload...), nil
 	}
-	payloadBytecode := append(bytecode, packedABI...)
-	return payloadBytecode, nil
+
+	return payload, nil
 }
 
-func newTx(
-	ctx context.Context,
-	backend bind.ContractBackend,
-	from, to *common.Address,
-	amount *big.Int,
-	gasLimit uint64,
-	payloadBytecode []byte,
-) *types.Transaction {
-
-	nonce, err := backend.PendingNonceAt(ctx, *from) // uint64(0)
-	if err != nil {
-		log.Fatal("Error getting pending nonce ", err)
-	}
-	gasPrice, err := backend.SuggestGasPrice(ctx) //new(big.Int)
-	if err != nil {
-		log.Fatal("Error suggesting gas price ", err)
-	}
-
-	// create contract transaction NewContractCreation is the same has NewTransaction with `to` == nil
-	// tx := types.NewTransaction(nonce, nil, amount, gasLimit, gasPrice, payloadBytecode)
-	var tx *types.Transaction
-	if to == nil {
-		tx = types.NewContractCreation(nonce, amount, gasLimit, gasPrice, payloadBytecode)
-	} else {
-		tx = types.NewTransaction(nonce, *to, amount, gasLimit, gasPrice, payloadBytecode)
-	}
-	return tx
-}
-
-// method created just to easily sign a tranasaction
-func signTx(tx *types.Transaction, userKey *ecdsa.PrivateKey) *types.Transaction {
-	signer := types.HomesteadSigner{} // this functions makes it easier to change signer if needed
-	signedTx, err := types.SignTx(tx, signer, userKey)
-	if err != nil {
-		log.Fatal("Error signing tx: ", err)
-	}
-	return signedTx
-}
-
-func DeployContract(
+func SendTransaction(
 	ctx context.Context,
 	backend bind.ContractBackend,
 	userKey *ecdsa.PrivateKey,
+	to *common.Address,
 	payload []byte,
 	amount *big.Int,
 	gasLimit uint64,
 ) (*types.Transaction, error) {
 	userAddr := crypto.PubkeyToAddress(userKey.PublicKey)
-	tx := newTx(ctx, backend, &userAddr, nil, amount, gasLimit, payload)
-	signedTx := signTx(tx, userKey)
 
-	err := backend.SendTransaction(ctx, signedTx)
+	tx, err := createNewTransaction(ctx, backend, &userAddr, to, amount, gasLimit, payload)
 	if err != nil {
 		return nil, err
 	}
+
+	signedTx, err := signTransaction(tx, userKey)
+	if err != nil {
+		return nil, err
+	}
+
+	err = backend.SendTransaction(ctx, signedTx)
+	if err != nil {
+		return nil, err
+	}
+
 	return signedTx, nil
-}
-
-func CompilePayload(
-	binStr string,
-	abiStr string,
-	constructorArgs ...interface{},
-) ([]byte, error) {
-	return generateContractPayload(binStr, abiStr, constructorArgs...)
-}
-
-// CallContract without changing the state
-func CallContract(
-	ctx context.Context,
-	client bind.ContractCaller,
-	contract *compiler.Contract,
-	from, to common.Address,
-	methodName string,
-	out interface{},
-	args ...interface{},
-) (res interface{}, err error) {
-	abiStr, err := json.Marshal(contract.Info.AbiDefinition)
-	if err != nil {
-		return nil, err
-	}
-
-	abiContract, err := abi.JSON(strings.NewReader(string(abiStr)))
-	if err != nil {
-		return nil, err
-	}
-
-	input, err := abiContract.Pack(methodName, args...)
-	if err != nil {
-		return nil, err
-	}
-	msg := ethereum.CallMsg{From: from, To: &to, Data: input}
-	output, err := client.CallContract(ctx, msg, nil)
-	if err != nil {
-		return nil, err
-	}
-	err = abiContract.Unpack(out, methodName, output)
-	if err != nil {
-		return nil, err
-	}
-
-	return out, nil
 }
 
 // FunctionCallTransaction execute function in contract
@@ -165,77 +92,110 @@ func FunctionCallTransaction(
 	ctx context.Context,
 	backend bind.ContractBackend,
 	userKey *ecdsa.PrivateKey,
-	contract *compiler.Contract,
+	contract *ContractInstance,
 	to common.Address,
 	amount *big.Int,
 	gasLimit uint64,
 	methodName string,
 	args ...interface{},
 ) (*types.Transaction, error) {
-
-	fmt.Print("Marshalling ABI\n")
-	abiStr, err := json.Marshal(contract.Info.AbiDefinition)
+	fmt.Println("Creating transaction payload...")
+	payload, err := CreateTransactionPayload(contract, methodName, args...)
 	if err != nil {
-		errStr := fmt.Sprintf("ERROR marshalling abi to string: %s\n", err)
+		errStr := fmt.Sprintf("error creating transaction payload: %s\n", err)
 		return nil, errors.New(errStr)
 	}
 
-	fmt.Print("JSONify ABI\n")
-	abiContract, err := abi.JSON(strings.NewReader(string(abiStr)))
-	if err != nil {
-		errStr := fmt.Sprintf("ERROR reading contract ABI: %s\n", err)
-		return nil, errors.New(errStr)
-	}
-
-	fmt.Print("Packing Args to ABI\n")
-	payload, err := abiContract.Pack(methodName, args...)
-	if err != nil {
-		errStr := fmt.Sprintf("ERROR packing the method name for the contract call: %s\n", err)
-		return nil, errors.New(errStr)
-	}
-
-	fmt.Print("Retrieving public key\n")
-	from := crypto.PubkeyToAddress(userKey.PublicKey)
-
-	fmt.Print("Creating transaction\n")
-	tx := newTx(ctx, backend, &from, &to, amount, gasLimit, payload)
-
-	fmt.Print("Signing transaction\n")
-	signedTx := signTx(tx, userKey)
-
-	fmt.Print("SENDING TRANSACTION\n")
-
-	err = backend.SendTransaction(ctx, signedTx)
-	if err != nil {
-		errStr := fmt.Sprintf("ERROR sending transaction: %s\n", err)
-		return nil, errors.New(errStr)
-	}
-	return signedTx, nil
+	return SendTransaction(ctx, backend, userKey, &to, payload, amount, gasLimit)
 }
 
-func CompileContract(contract string) (compiledContract *compiler.Contract, err error) {
-	basePath := os.Getenv("GOPATH") + "/src/github.com/clearmatics/ion/contracts/"
-	contractPath := basePath + contract + ".sol"
+// CallContract without changing the state
+func CallContract(
+	ctx context.Context,
+	client bind.ContractCaller,
+	contract *ContractInstance,
+	from, to common.Address,
+	methodName string,
+	out interface{},
+	args ...interface{},
+) (res interface{}, err error) {
+	payload, err := CreateTransactionPayload(contract, methodName, args...)
+	if err != nil {
+		errStr := fmt.Sprintf("error creating transaction payload: %s\n", err)
+		return nil, errors.New(errStr)
+	}
 
-	contracts, err := compiler.CompileSolidity("", []string{}, contractPath)
+	callMsg := ethereum.CallMsg{From: from, To: &to, Data: payload}
+	output, err := client.CallContract(ctx, callMsg, nil)
+	if err != nil {
+		errStr := fmt.Sprintf("error calling contract function: %s\n", err)
+		return nil, errors.New(errStr)
+	}
+
+	err = contract.Abi.Unpack(out, methodName, output)
+	if err != nil {
+		errStr := fmt.Sprintf("error unpacking call message result: %s\n", err)
+		return nil, errors.New(errStr)
+	}
+
+	return out, nil
+}
+
+func createNewTransaction(
+	ctx context.Context,
+	backend bind.ContractBackend,
+	from, to *common.Address,
+	amount *big.Int,
+	gasLimit uint64,
+	payload []byte,
+) (*types.Transaction, error) {
+	nonce, err := backend.PendingNonceAt(ctx, *from) // uint64(0)
 	if err != nil {
 		return nil, err
 	}
 
-	compiledContract = contracts[basePath+contract+".sol:"+contract]
+	gasPrice, err := backend.SuggestGasPrice(ctx) //new(big.Int)
+	if err != nil {
+		return nil, err
+	}
 
-	return compiledContract, nil
+	// create contract transaction NewContractCreation is the same has NewTransaction with `to` == nil
+	// tx := types.NewTransaction(nonce, nil, amount, gasLimit, gasPrice, payload)
+	var tx *types.Transaction
+	if to == nil {
+		tx = types.NewContractCreation(nonce, amount, gasLimit, gasPrice, payload)
+	} else {
+		tx = types.NewTransaction(nonce, *to, amount, gasLimit, gasPrice, payload)
+	}
+
+	return tx, nil
+}
+
+// method created just to easily sign a tranasaction
+func signTransaction(tx *types.Transaction, userKey *ecdsa.PrivateKey) (*types.Transaction, error) {
+	signer := types.HomesteadSigner{} // this functions makes it easier to change signer if needed
+
+	signedTx, err := types.SignTx(tx, signer, userKey)
+	if err != nil {
+		return nil, err
+	}
+
+	return signedTx, nil
 }
 
 func CompileContractAt(contractPath string, solc string) (compiledContract *compiler.Contract, err error) {
-	path := strings.Split(contractPath, "/")
+	absPath, err := filepath.Abs(contractPath)
+	if err != nil {
+		return nil, err
+	}
+	path := strings.Split(absPath, "/")
 	contractFolder := path[len(path)-2]
 	contractFile := path[len(path)-1]
 
-	i := strings.Index(contractPath, contractFolder)
-	remapping := fmt.Sprintf("../=%s", contractPath[:i])
+	i := strings.Index(absPath, contractFolder)
+	remapping := fmt.Sprintf("../=%s", absPath[:i])
 
-	contract, err := compiler.CompileSolidity(solc, []string{remapping}, contractPath)
+	contract, err := compiler.CompileSolidity(solc, []string{remapping}, absPath)
 	if err != nil {
 		return nil, err
 	}
@@ -250,7 +210,11 @@ func CompileContractAt(contractPath string, solc string) (compiledContract *comp
 }
 
 func CompileContractWithLibraries(contractPath string, libraries map[string]common.Address, solc string) (compiledContract *compiler.Contract, err error) {
-	path := strings.Split(contractPath, "/")
+	absPath, err := filepath.Abs(contractPath)
+	if err != nil {
+		return nil, err
+	}
+	path := strings.Split(absPath, "/")
 	contractFolder := path[len(path)-2]
 	contractFile := path[len(path)-1]
 
@@ -263,10 +227,10 @@ func CompileContractWithLibraries(contractPath string, libraries map[string]comm
 	}
 
 	// Add remapping values to args
-	i := strings.Index(contractPath, contractFolder)
-	args = append(args, fmt.Sprintf("../=%s ", contractPath[:i]))
+	i := strings.Index(absPath, contractFolder)
+	args = append(args, fmt.Sprintf("../=%s ", absPath[:i]))
 
-	contract, err := compiler.CompileSolidity(solc, args, contractPath)
+	contract, err := compiler.CompileSolidity(solc, args, absPath)
 	if err != nil {
 		return nil, err
 	}

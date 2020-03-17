@@ -3,17 +3,10 @@ package cli
 
 import (
 	"fmt"
-	"github.com/clearmatics/ion-cli/cli/cmd"
-	"github.com/clearmatics/ion-cli/cli/core"
-	//"math/big"
-	//"strconv"
-	//"strings"
-	//
-	//"github.com/ethereum/go-ethereum/accounts/abi/bind"
-	//"github.com/ethereum/go-ethereum/common"
-
 	"github.com/abiosoft/ishell"
-
+	"github.com/clearmatics/ion-cli/cli/cmd"
+	"github.com/clearmatics/ion-cli/cli/cmd/clique"
+	"github.com/clearmatics/ion-cli/cli/core"
 	"github.com/clearmatics/ion-cli/config"
 )
 
@@ -29,10 +22,6 @@ func printWelcome() {
 func Launch(setup *config.Setup) {
 	// by default, new shell includes 'exit', 'help' and 'clear' commands.
 	shell := ishell.New()
-
-	// Create new context
-	//ctx := context.Background()
-
 	session := core.InitSession()
 
 	if setup != nil {
@@ -48,7 +37,7 @@ func Launch(setup *config.Setup) {
 
 		// Compile and add all contract instances to memory
 		for _, configContract := range setup.Contracts {
-			compiledContract, err := core.CompileContract(session, configContract.File)
+			compiledContract, err := core.AddCompilerAndCompileContract(session, configContract.File)
 			if err != nil {
 				fmt.Printf("Setup Failed: Compiling contract %s from configuration failed: %s", configContract.Name, err.Error())
 				return
@@ -69,7 +58,11 @@ func Launch(setup *config.Setup) {
 	}
 
 	// Add commands
-	for _, command := range cmd.CoreCommands(shell, session) {
+	for _, command := range cmd.CoreCommands(session) {
+		shell.AddCmd(command)
+	}
+
+	for _, command := range clique.CliqueCommands(session) {
 		shell.AddCmd(command)
 	}
 

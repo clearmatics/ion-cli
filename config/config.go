@@ -66,7 +66,6 @@ func ReadString(path string) (contents string) {
 	contents = string(raw)
 
 	return
-
 }
 
 func InitUser(privkeystore string, password string) (user Account, err error) {

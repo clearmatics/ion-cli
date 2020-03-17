@@ -13,16 +13,16 @@ import (
 
 // ReceiptTrie generate trie for receipts
 // TODO: the argument should be of type interface so that this is a generic function
-func ReceiptTrie(receipts []*types.Receipt) *trie.Trie {
+func ReceiptTrie(receipts []*types.Receipt) (*trie.Trie, error) {
 	var receiptRLPidxArr, receiptRLPArr [][]byte
 	for idx, receipt := range receipts {
 		idxRLP, err := rlp.EncodeToBytes(uint(idx))
 		if err != nil {
-			log.Fatalf("ReceiptTrie RLP error: %v", err)
+			return nil, err
 		}
 		txRLP, err := rlp.EncodeToBytes(receipt)
 		if err != nil {
-			log.Fatalf("ReceiptTrie RLP error: %v", err)
+			return nil, err
 		}
 
 		receiptRLPidxArr = append(receiptRLPidxArr, idxRLP)
@@ -31,21 +31,21 @@ func ReceiptTrie(receipts []*types.Receipt) *trie.Trie {
 
 	trieObj := generateTrie(receiptRLPidxArr, receiptRLPArr)
 
-	return trieObj
+	return trieObj, nil
 }
 
 // TxTrie generated Trie out of transaction array
 // TODO: the argument should be of type interface so that this is a generic function
-func TxTrie(transactions []*types.Transaction) *trie.Trie {
+func TxTrie(transactions []*types.Transaction) (*trie.Trie, error) {
 	var txRLPIdxArr, txRLPArr [][]byte
 	for idx, tx := range transactions {
 		idxRLP, err := rlp.EncodeToBytes(uint(idx))
 		if err != nil {
-			log.Fatalf("TxTrie RLP error: %v", err)
+			return nil, err
 		}
 		txRLP, err := rlp.EncodeToBytes(tx)
 		if err != nil {
-			log.Fatalf("TxTrie RLP error: %v", err)
+			return nil, err
 		}
 
 		txRLPIdxArr = append(txRLPIdxArr, idxRLP)
@@ -54,7 +54,7 @@ func TxTrie(transactions []*types.Transaction) *trie.Trie {
 
 	trieObj := generateTrie(txRLPIdxArr, txRLPArr)
 
-	return trieObj
+	return trieObj, nil
 }
 
 func generateTrie(paths [][]byte, values [][]byte) *trie.Trie {
@@ -78,35 +78,4 @@ func generateTrie(paths [][]byte, values [][]byte) *trie.Trie {
 	}
 
 	return trieObj
-}
-
-// Proof creates an array of the proof pathj ordered
-func Proof(trie *trie.Trie, path []byte) []byte {
-	proof := generateProof(trie, path)
-	proofRLP, err := rlp.EncodeToBytes(proof)
-	if err != nil {
-		log.Fatal("ERROR encoding proof: ", err)
-	}
-	return proofRLP
-}
-
-func generateProof(trie *trie.Trie, path []byte) []interface{} {
-	proof := memorydb.New()
-	err := trie.Prove(path, 0, proof)
-	if err != nil {
-		log.Fatal("ERROR failed to create proof")
-	}
-
-	var proofArr []interface{}
-	for nodeIt := trie.NodeIterator(nil); nodeIt.Next(true); {
-		if val, err := proof.Get(nodeIt.Hash().Bytes()); val != nil && err == nil {
-			var decodedVal interface{}
-			err = rlp.DecodeBytes(val, &decodedVal)
-			if err != nil {
-				log.Fatalf("ERROR(%s) failed decoding RLP: 0x%0x\n", err, val)
-			}
-			proofArr = append(proofArr, decodedVal)
-		}
-	}
-	return proofArr
 }
