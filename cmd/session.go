@@ -5,17 +5,18 @@ import (
 	"github.com/spf13/cobra"
 	"time"
 )
+
 // todo we might restore a session entirely from file
 // TODO override single flags of using file
 // TODO all the flags containing network, account, etc to use
-
+// TODo clean session cached objects
 var (
 	deleteSession bool
 
 	sessionCmd = &cobra.Command{
 		Use:   "session",
 		Short: "Manage a session within ION",
-		Long: "Allow to create, restore or delete a session file further calls would read the configs from and populate with needed data for other calls:",
+		Long:  "Allow to create, restore or delete a session file further calls would read the configs from and populate with needed data for other calls:",
 		Run: func(cmd *cobra.Command, args []string) {
 
 			if deleteSession {
@@ -39,7 +40,7 @@ var (
 	addSessionCmd = &cobra.Command{
 		Use:   "init",
 		Short: "Add a session within ION",
-		Long: "Allow to create, a session file further calls would read the configs from and populate with needed data for other calls:",
+		Long:  "Allow to create, a session file further calls would read the configs from and populate with needed data for other calls:",
 		Run: func(cmd *cobra.Command, args []string) {
 
 			// create a new session
@@ -75,5 +76,3 @@ func initAddCmd() {
 	addSessionCmd.Flags().StringVarP(&accountName, "account", "a", "", "The account name to use in the session")
 	addSessionCmd.MarkFlagRequired("account")
 }
-
-

@@ -1,4 +1,3 @@
-
 package cmd
 
 import (
@@ -7,30 +6,32 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// TODO list, remove subcommands
+// TODO remove subcommands
 
 // accountCmd represents the account command
 var (
+	keyFile      string
+	password     string
+	accountsFile string
+	accountName  string
 
 	accountCmd = &cobra.Command{
-		Use:   "account",
+		Use:   "accounts",
 		Short: "Manage the accounts",
-		Long: `Manage the accounts you will use to interact with the ION smart contracts`,
+		Long:  `Manage the accounts you will use to interact with the ION smart contracts`,
 		Run: func(cmd *cobra.Command, args []string) {
 
-			fmt.Print("I will list your accounts when god will teach me how..")
+			fmt.Println("Fetching the accounts available..")
+
+			err := backend.ListAccounts(accountsFile)
+			returnIfError(err)
 		},
 	}
-
-	keyFile string
-	password string
-	accountsFile string
-	accountName string
 
 	addAccountCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Add an account to the config file",
-		Long: `Add an account object to the config file. You will be able to use that in a session just by his name`,
+		Long:  `Add an account object to the config file. You will be able to use that in a session just by his name`,
 		Run: func(cmd *cobra.Command, args []string) {
 
 			fmt.Println("Storing the new account object.. ")
@@ -62,7 +63,7 @@ func initAddAccount() {
 	addAccountCmd.Flags().StringVarP(&password, "pwd", "p", "", "The password to unlock the account")
 	addAccountCmd.Flags().StringVarP(&accountsFile, "accountsFile", "a", "./config/accounts.json", "The file containing the accounts")
 
-	addAccountCmd.MarkFlagRequired("name")
-	addAccountCmd.MarkFlagRequired("keyfile")
-	addAccountCmd.MarkFlagRequired("pwd")
+	returnIfError(addAccountCmd.MarkFlagRequired("name"))
+	returnIfError(addAccountCmd.MarkFlagRequired("keyfile"))
+	returnIfError(addAccountCmd.MarkFlagRequired("pwd"))
 }
