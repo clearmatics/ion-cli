@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	//"github.com/clearmatics/ion-cli/backend"
 	"github.com/spf13/cobra"
 	"time"
 )
@@ -20,19 +21,17 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 
 			if deleteSession {
-				// delete the session
-				session.Active = false
-				session.Timestamp = 0
 
+				// delete the session
 				fmt.Println("Deleting session..")
 
-				err := session.PersistSession(sessionPath)
+				err := session.DeleteSession(sessionPath)
 				returnIfError(err)
 
 				fmt.Println("Success!")
 
 			} else {
-				fmt.Printf("These are the session parameters you are using: \n%+v", *session)
+				fmt.Printf("These are the session parameters you are using: \n%+v", session)
 			}
 		},
 	}
@@ -47,6 +46,7 @@ var (
 			session.Active = true
 			session.Timestamp = int(time.Now().Unix())
 			session.AccountName = accountName
+			//session.BlockInterface = backend.EthBlockHeader{}
 
 			fmt.Println("Creating a new session..")
 

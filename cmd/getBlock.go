@@ -1,15 +1,10 @@
 package cmd
 
 import (
-	"encoding/hex"
-	"errors"
 	"fmt"
-	"github.com/clearmatics/ion-cli/utils"
-	"github.com/ethereum/go-ethereum/common"
-	"github.com/spf13/viper"
-	"math/big"
-
+	"github.com/clearmatics/ion-cli/backend"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -25,25 +20,23 @@ var (
 
 			fmt.Println("Connecting to the RPC client..")
 
-			eth, err := utils.Client(viper.GetString("rpc"))
+			eth, err := backend.GetClient(viper.GetString("rpc"))
 			returnIfError(err)
+
+			// TODO should be dynamic
+			block := &backend.EthBlockHeader{}
 
 			// assign the block to session object
 			if !byHash {
 				fmt.Printf("Retrieving block by number: %v\n", blockInfo)
 
-				number := new(big.Int)
-				_, ok := number.SetString(blockInfo, 10)
-				if !ok {
-					returnIfError(errors.New(fmt.Sprintf("Invalid block number: %s", blockInfo)))
-				}
-
-				session.Block.Header, _, err = utils.GetBlockHeaderByNumber(eth, number)
+				block.Header, _, err = eth.GetBlockByNumber(blockInfo)
 				returnIfError(err)
+
 			} else {
 				fmt.Printf("Retrieving block by hash: %v\n", blockInfo)
-				hash := common.HexToHash(blockInfo)
-				session.Block.Header, _, err = utils.GetBlockHeaderByHash(eth, hash)
+
+				block.Header, _, err = eth.GetBlockByHash(blockInfo)
 				returnIfError(err)
 			}
 
@@ -51,14 +44,16 @@ var (
 			if rlpEncoded {
 				// cache the rlp encoding of that block in the session
 				fmt.Println("Rlp encoding it..")
-				rlp, err := utils.RlpEncodeBlock(session.Block.Header)
+				err = block.RlpEncode()
 				returnIfError(err)
 
-				session.Block.RlpEncoded = hex.EncodeToString(rlp)
 			}
 
+			// add block to session struct
+			session.Blocks["eth"] = block
+
 			// update session file
-			returnIfError(session.PersistSession(sessionPath))
+			returnIfError(session.PersistSession("./config/session-test.json"))
 
 			fmt.Println("Success! Session file updated")
 		},

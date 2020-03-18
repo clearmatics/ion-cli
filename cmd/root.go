@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	//"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/clearmatics/ion-cli/backend"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"github.com/clearmatics/ion-cli/backend"
 	"io/ioutil"
 	"time"
 )
@@ -18,7 +19,7 @@ var(
 
 	sessionPath string
 	configPath string
-	session *backend.Session
+	session backend.Session
 
 	timeoutSec =  3600
 
@@ -46,8 +47,8 @@ func init(){
 
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config/test.json", "Config file to populate the session with")
-	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "s", "./config/session.json", "Session file to populate the session with")
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config/session-test.json", "Config file to populate the session with")
+	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "s", "./config/session-test.json", "Session file to populate the session with")
 
 	// choose config
 	initConfig(sessionPath, configPath)
@@ -57,10 +58,11 @@ func init(){
 // choose whether to override configs with session fields
 func initConfig(sessionPath string, configPath string) {
 
+	// unmarshal the session from file
 	b, _ := ioutil.ReadFile(sessionPath)
 	json.Unmarshal(b, &session)
 
-	if int(time.Now().Unix()) - session.Timestamp < timeoutSec  {
+	if !session.IsValid(timeoutSec) {
 		// update the session
 		session.Active = true
 		session.Timestamp = int(time.Now().Unix())
