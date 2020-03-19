@@ -1,4 +1,4 @@
-package backend
+package ethereum
 
 import (
 	"context"
@@ -6,9 +6,16 @@ import (
 	"github.com/clearmatics/ion-cli/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/rpc"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"math/big"
 )
+
+type EthClient struct {
+	client    *ethclient.Client
+	rpcClient *rpc.Client
+	url       string
+}
 
 func GetClient(url string) (*EthClient, error) {
 	rpc := utils.ClientRPC(url)

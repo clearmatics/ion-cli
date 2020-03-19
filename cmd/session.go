@@ -46,7 +46,6 @@ var (
 			session.Active = true
 			session.Timestamp = int(time.Now().Unix())
 			session.AccountName = accountName
-			//session.BlockInterface = backend.EthBlockHeader{}
 
 			fmt.Println("Creating a new session..")
 
