@@ -13,7 +13,9 @@ var (
 	blockType  string
 	byHash     bool
 	rlpEncoded bool
+
 	block backend.BlockInterface
+	network string
 
 	getBlockCmd = &cobra.Command{
 		Use:   "getBlock",
@@ -21,10 +23,14 @@ var (
 		Long:  `Allow to retrieve a block through a rpc call, either by number or by hash, rlp encoded or as object`,
 		Run: func(cmd *cobra.Command, args []string) {
 
+			// TODO checks on args if allowed before going on
+
 			// define which block type
 			switch blockType {
 			case "eth":
 				block = &ethereum.EthBlockHeader{}
+			case "clique":
+				block = &ethereum.CliqueBlockHeader{}
 			default:
 				// TODO
 				fmt.Println("This block type is not recognised. Availables are..")
@@ -35,13 +41,13 @@ var (
 			if !byHash {
 				fmt.Printf("Request of retrieving %v block by number: %v\n", blockType, blockInfo)
 
-				err := block.GetByNumber(viper.GetString("rpc"), blockInfo)
+				err := block.GetByNumber(viper.GetString("networks." + network), blockInfo)
 				returnIfError(err)
 
 			} else {
 				fmt.Printf("Request of retrieving %v block by hash: %v\n", blockType, blockInfo)
 
-				err := block.GetByHash(viper.GetString("rpc"), blockInfo)
+				err := block.GetByHash(viper.GetString("networks." + network), blockInfo)
 				returnIfError(err)
 			}
 
@@ -70,6 +76,7 @@ func init() {
 	getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "", false, "Specify if reading the block by number or by hash")
 	getBlockCmd.Flags().StringVarP(&blockInfo, "block", "b", "latest", "Block number or hash")
 	getBlockCmd.Flags().StringVarP(&blockType, "type", "t", "eth", "Block header type format")
+	getBlockCmd.Flags().StringVarP(&network, "network", "n", "local", "Network name as in config")
 
 	rootCmd.AddCommand(getBlockCmd)
 

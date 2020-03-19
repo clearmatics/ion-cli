@@ -60,9 +60,10 @@ func initConfig(sessionPath string, configPath string) {
 
 	// unmarshal the session from file
 	b, _ := ioutil.ReadFile(sessionPath)
-	json.Unmarshal(b, &session)
+	returnIfError(json.Unmarshal(b, &session))
+	fmt.Println(session)
 
-	if !session.IsValid(timeoutSec) {
+	if session.IsValid(timeoutSec) {
 		// update the session
 		session.Active = true
 		session.Timestamp = int(time.Now().Unix())
@@ -81,11 +82,7 @@ func initConfig(sessionPath string, configPath string) {
 		viper.SetConfigFile(configPath)
 	}
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("Fatal error config file: %s \n", err))
-	}
-
+	returnIfError(viper.ReadInConfig())
 }
 
 

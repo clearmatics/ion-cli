@@ -3,28 +3,41 @@ package ethereum
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/clearmatics/ion-cli/utils"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
 // Implements the standard Block Interface of the session object
-type EthBlockHeader struct {
+type CliqueBlockHeader struct {
 	Header     *types.Header 	 `json:"header"`
-	RlpEncoded []byte        `json:"rlp_encoded"`
+	RlpSignedEncoded []byte        `json:"rlp_signed"`
+	RlpUnsignedEncoded []byte        `json:"rlp_unsigned"`
 }
 
 // calculate and assign the rlp form of the header
-func (b *EthBlockHeader) RlpEncode() (err error) {
-	b.RlpEncoded, err = rlp.EncodeToBytes(&b.Header)
+func (b *CliqueBlockHeader) RlpEncode() (err error) {
+	// Encode the orginal block header
+	_, err = rlp.EncodeToBytes(&b)
 	if err != nil {
 		fmt.Println("can't RLP encode requested block:", err)
-		return err
+		return
 	}
 
+	// Generate an interface to encode the blockheader without the signature in the extraData
+	b.RlpSignedEncoded, err = utils.RlpEncodeBlock(b.Header)
+	if err != nil {
+		return
+	}
+
+	b.RlpUnsignedEncoded, err = utils.RlpEncodeUnsignedBlock(b.Header)
+	if err != nil {
+		return
+	}
 	return nil
 }
 
-func (b *EthBlockHeader) GetByNumber(rpcURL string, number string) (err error) {
+func (b *CliqueBlockHeader) GetByNumber(rpcURL string, number string) (err error) {
 	fmt.Println("Connecting to the RPC client..")
 
 	eth, err := GetClient(rpcURL)
@@ -38,7 +51,7 @@ func (b *EthBlockHeader) GetByNumber(rpcURL string, number string) (err error) {
 	return nil
 }
 
-func (b *EthBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
+func (b *CliqueBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
 	fmt.Println("Connecting to the RPC client..")
 
 	eth, err := GetClient(rpcURL)
@@ -53,8 +66,7 @@ func (b *EthBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
 }
 
 
-
 // TODO if needed
-func (b EthBlockHeader) String() string{
+func (b CliqueBlockHeader) String() string{
 	return fmt.Sprintf(hex.EncodeToString(b.Header.Extra))
 }
