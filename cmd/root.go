@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	//"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
@@ -14,13 +13,20 @@ import (
 // TODO add log with verbosity level
 // TODO we might move also root configs command to backend
 var(
-	// flags can be persistent or local - more down below
+	// flags
 	Verbose bool
-
 	sessionPath string
 	configPath string
-	session backend.Session
+	profilesPath string
+	profileName string
+	deleteFlag bool
 
+	// global variable to all commands
+	activeProfile backend.Profile
+	profiles backend.Profiles
+
+	session backend.Session
+	configs *viper.Viper
 	timeoutSec =  3600
 
 	rootCmd = &cobra.Command{
@@ -29,7 +35,8 @@ var(
 		Long: "Ion is a system and function-agnostic framework for building cross-interacting smart contracts between blockchains and/or systems",
 
 		Run: func(cmd *cobra.Command, args []string) {
-
+			// choose profile to use
+			initProfile()
 		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			// this to validate positional arguments
@@ -47,42 +54,40 @@ func init(){
 
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config/session-test.json", "Config file to populate the session with")
-	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "s", "./config/session-test.json", "Session file to populate the session with")
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config/config-test.json", "Configs file path")
+	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "s", "./config/session-test.json", "Session file path")
+	rootCmd.PersistentFlags().StringVarP(&profilesPath, "profiles", "", "./config/profiles-test.json", "Profiles file path")
 
-	// choose config
-	initConfig(sessionPath, configPath)
+	rootCmd.Flags().StringVarP(&profileName, "profile", "p", "", "The profile name the configs will be taken from")
 
 }
 
-// choose whether to override configs with session fields
-func initConfig(sessionPath string, configPath string) {
+func initProfile() {
 
-	// unmarshal the session from file
-	b, _ := ioutil.ReadFile(sessionPath)
-	returnIfError(json.Unmarshal(b, &session))
-	fmt.Println(session)
+	returnIfError(loadProfiles(profilesPath))
 
-	if session.IsValid(timeoutSec) {
-		// update the session
-		session.Active = true
-		session.Timestamp = int(time.Now().Unix())
+	// if profile flag is set use that if it's a valid profile
+	if profiles.Exist(profileName){
+		fmt.Println("Using profile", profileName, "from the flag")
 
-		err := session.PersistSession(sessionPath)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			viper.SetConfigFile(sessionPath)
-			fmt.Println("Using session configs")
-		}
-
+		activeProfile = profiles[profileName]
 	} else {
-		fmt.Println("Using default configs")
+		// check if a session is active
+		b, _ := ioutil.ReadFile(sessionPath)
+		returnIfError(json.Unmarshal(b, &session))
 
-		viper.SetConfigFile(configPath)
+		if session.IsValid(timeoutSec) && profiles.Exist(session.Profile) {
+			fmt.Println("Loading profile", session.Profile, "from the session")
+
+			session.LastAccess = int(time.Now().Unix())
+			session.Save(sessionPath)
+
+			activeProfile = profiles[session.Profile]
+		}
 	}
 
-	returnIfError(viper.ReadInConfig())
+	// TODO how about no profiles?
+	fmt.Println(activeProfile)
 }
 
 

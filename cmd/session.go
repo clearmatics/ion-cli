@@ -25,7 +25,7 @@ var (
 				// delete the session
 				fmt.Println("Deleting session..")
 
-				err := session.DeleteSession(sessionPath)
+				err := session.Delete(sessionPath)
 				returnIfError(err)
 
 				fmt.Println("Success!")
@@ -42,14 +42,18 @@ var (
 		Long:  "Allow to create, a session file further calls would read the configs from and populate with needed data for other calls:",
 		Run: func(cmd *cobra.Command, args []string) {
 
+			if len(args) != 1 {
+				fmt.Println("Specify the profile you want to initialize the session for")
+				return
+			}
+
 			// create a new session
-			session.Active = true
-			session.Timestamp = int(time.Now().Unix())
-			session.AccountName = accountName
+			session.LastAccess = int(time.Now().Unix())
+			session.Profile = args[0]
 
-			fmt.Println("Creating a new session..")
+			fmt.Println(fmt.Sprintf("Creating a new session for profile %v", args[0]))
 
-			err := session.PersistSession(sessionPath)
+			err := session.Save(sessionPath)
 			returnIfError(err)
 
 			fmt.Println("Success!")
@@ -62,16 +66,7 @@ func init() {
 	// root command
 	sessionCmd.Flags().BoolVarP(&deleteSession, "delete", "d", false, "Delete the current session")
 
-	// sub commands
-	initAddCmd()
-
 	// create the tree of commands
 	rootCmd.AddCommand(sessionCmd)
 	sessionCmd.AddCommand(addSessionCmd)
-}
-
-func initAddCmd() {
-	// add sub command
-	addSessionCmd.Flags().StringVarP(&accountName, "account", "a", "", "The account name to use in the session")
-	addSessionCmd.MarkFlagRequired("account")
 }
