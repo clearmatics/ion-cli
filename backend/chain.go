@@ -2,7 +2,7 @@ package backend
 
 // a chain holds network and wallet configs of a profile, plus cached data for subsequent calls
 type Chain struct {
-	Network Network `json:"network"`
+	Network NetworkInfo `json:"network"`
 	Accounts Accounts `json:"accounts"`
 
 	// cache
@@ -16,24 +16,22 @@ type Chain struct {
 
 type Chains map[string]Chain
 
-type Network struct {
-	Name string `json:"name"`
-	Url string `json:"url"`
-}
-
+// tells if a chain with id exists
 func (c Chains) Exist(id string) bool {
-	return c[id].Network != Network{}
+	return c[id].Network != NetworkInfo{}
 }
 
-func (c Chains) Add (id string, network Network) {
+// add a chain object with id id
+func (c Chains) Add (id string, network NetworkInfo) {
 	c[id] = Chain{
 		Network:     network,
-		Accounts:    make(map[string]AccountInfo),
+		Accounts:    make(map[string]WalletInfo),
 		Blocks:      nil,
 		Transaction: Transaction{},
 	}
 }
 
+// remove a chain object with id id
 func (c Chains) Remove (id string) {
 	delete(c, id)
 }

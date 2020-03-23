@@ -26,3 +26,8 @@ type Wallet struct {
 	Name string             `json:"name"`
 }
 
+// keeps all config of a particular chain
+type NetworkInfo struct {
+	Name string `json:"name"`
+	Url string `json:"url"`
+}

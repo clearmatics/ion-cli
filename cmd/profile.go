@@ -9,8 +9,6 @@ import (
 // profileCmd represents the profile command
 var (
 
-	deleteFlag bool //flag to remove object
-
 	/* PROFILES */
 	profileCmd = &cobra.Command{
 		Use:   "profiles",
@@ -74,7 +72,7 @@ var (
 					fmt.Println(fmt.Sprintf("Creating chain %v in profile %v", chainId, profileId))
 					returnIfError(loadConfig(configPath))
 
-					network := backend.Network{}
+					network := backend.NetworkInfo{}
 					returnIfError(configs.UnmarshalKey("networks." + chainId, &network))
 
 					profiles[profileId].Chains.Add(chainId, network)
@@ -121,7 +119,7 @@ var (
 
 						returnIfError(loadConfig(configPath))
 
-						account := backend.AccountInfo{}
+						account := backend.WalletInfo{}
 						returnIfError(configs.UnmarshalKey("accounts."+ walletId, &account))
 
 						profiles[profileId].Chains[chainId].Accounts.Add(walletId, account)

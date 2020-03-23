@@ -31,10 +31,12 @@ func (p Profiles) Save(path string) error {
 	return nil
 }
 
+// tells if a profile name id exists
 func (p Profiles) Exist(id string) bool {
 	return p[id].Name != ""
 }
 
+// initialize a profile with profileId
 func (p Profiles) Add (profileId string) {
 	p[profileId] = Profile{
 		Name:   profileId,
@@ -42,6 +44,7 @@ func (p Profiles) Add (profileId string) {
 	}
 }
 
+// remove profile with profiledId from profiles
 func (p Profiles) Remove (profileId string) {
 	delete(p, profileId)
 }
