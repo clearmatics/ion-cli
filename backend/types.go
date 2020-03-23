@@ -26,9 +26,3 @@ type Wallet struct {
 	Name string             `json:"name"`
 }
 
-// an account info as stored in the configs
-type AccountInfo struct {
-	Name     string `json:"name"`
-	Keyfile  string `json:"keyfile"`
-	Password string `json:"password"`
-}

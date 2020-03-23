@@ -26,23 +26,22 @@ var (
 			profileId := args[0]
 
 			returnIfError(loadProfiles(profilesPath))
-			returnIfError(loadConfig(configPath))
 
 			if profiles.Exist(profileId) {
 
 				if deleteFlag {
 					fmt.Println("Deleting profile", profileId)
-					delete (profiles, profileId)
+					profiles.Remove(profileId)
 				} else {
 					fmt.Println("This profile already exist:\n", profiles[profileId])
 				}
 
-				profiles.Save(profilesPath)
-
 			} else {
 				fmt.Println("Creating a profile named", profileId)
-				profiles[profileId] = *backend.InitProfile(profileId)
+				profiles.Add(profileId)
 			}
+
+			profiles.Save(profilesPath)
 		},
 	}
 
@@ -59,29 +58,27 @@ var (
 			}
 
 			profileId := args[0]
-			networkId := args[1]
+			chainId := args[1]
 
 			returnIfError(loadProfiles(profilesPath))
 
 			if profiles.Exist(profileId) {
 
 				if deleteFlag {
-					fmt.Println(fmt.Sprintf("Deleting chain %v in profile %v", networkId, profileId))
 
-					delete (profiles[profileId].Chains, networkId)
+					fmt.Println(fmt.Sprintf("Deleting chain %v in profile %v", chainId, profileId))
+					profiles[profileId].Chains.Remove(chainId)
+
 				} else {
-					fmt.Println(fmt.Sprintf("Creating chain %v in profile %v", networkId, profileId))
+
+					fmt.Println(fmt.Sprintf("Creating chain %v in profile %v", chainId, profileId))
 					returnIfError(loadConfig(configPath))
 
 					network := backend.Network{}
-					returnIfError(configs.UnmarshalKey("networks." + networkId, &network))
+					returnIfError(configs.UnmarshalKey("networks." + chainId, &network))
 
-					profiles[profileId].Chains[networkId] = backend.Chain{
-						Network:     network,
-						Accounts:    make(map[string]backend.AccountInfo),
-						Blocks:      nil,
-						Transaction: backend.Transaction{},
-					}
+					profiles[profileId].Chains.Add(chainId, network)
+
 				}
 
 				profiles.Save(profilesPath)
@@ -117,16 +114,17 @@ var (
 					if deleteFlag {
 
 						fmt.Println(fmt.Sprintf("Deleting wallet %v of chain %v in profile %v", walletId, chainId, profileId))
-						delete (profiles[profileId].Chains[chainId].Accounts, walletId)
+						profiles[profileId].Chains[chainId].Accounts.Remove(walletId)
 
 					} else {
 						fmt.Println(fmt.Sprintf("Creating wallet %v of chain %v in profile %v", walletId, chainId, profileId))
 
 						returnIfError(loadConfig(configPath))
-						wallet := backend.AccountInfo{}
-						returnIfError(configs.UnmarshalKey("accounts."+ walletId, &wallet))
 
-						profiles[profileId].Chains[chainId].Accounts[walletId] = wallet
+						account := backend.AccountInfo{}
+						returnIfError(configs.UnmarshalKey("accounts."+ walletId, &account))
+
+						profiles[profileId].Chains[chainId].Accounts.Add(walletId, account)
 					}
 
 					profiles.Save(profilesPath)

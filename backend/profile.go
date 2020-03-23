@@ -6,31 +6,12 @@ import (
 	"io/ioutil"
 )
 
-type Chain struct {
-	Network Network `json:"network"`
-	Accounts map[string]AccountInfo `json:"accounts"`
-
-	// cache
-	Blocks BlockMap `json:"blocks"`
-	Transaction Transaction `json:"transaction"`
-
-	// ion proofs
-
-	// contracts
-}
-
-type Network struct {
-	Name string `json:"name"`
-	Url string `json:"url"`
-}
-
 type Profile struct {
 	Name string `json:"name"`
 	Chains Chains`json:"networks"`
 }
 
 type Profiles map[string]Profile
-type Chains map[string]Chain
 
 // store all the profiles to disk
 func (p Profiles) Save(path string) error {
@@ -54,16 +35,15 @@ func (p Profiles) Exist(id string) bool {
 	return p[id].Name != ""
 }
 
-func (c Chains) Exist(id string) bool {
-	return c[id].Network != Network{}
-}
-
-// initialize a profile object
-func InitProfile(id string) *Profile {
-	return &Profile{
-		Name:   id,
+func (p Profiles) Add (profileId string) {
+	p[profileId] = Profile{
+		Name:   profileId,
 		Chains: make(map[string]Chain),
 	}
+}
+
+func (p Profiles) Remove (profileId string) {
+	delete(p, profileId)
 }
 
 
