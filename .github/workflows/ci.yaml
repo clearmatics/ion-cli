@@ -28,6 +28,7 @@ jobs:
           make build
           make test
           make coverage
+          make documentation
         env:
           GOPATH: "/home/runner/go"
           GOBIN: "/home/runner/go/bin"
