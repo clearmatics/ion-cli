@@ -11,9 +11,10 @@ import (
 /* CHAINS OF A PROFILE */
 
 var (
+	// TODO doc
 	chainsCmd = &cobra.Command{
 		Use: "chains",
-		Long: "Manage the chains configuration of a profile",
+		Short: "Manage the chains configuration of a profile",
 	}
 
 	chainArgs = []string{"profileID", "networkID"}

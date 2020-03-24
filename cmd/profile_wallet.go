@@ -12,9 +12,10 @@ import (
 
 var (
 
+	// TODO doc
 	walletsCmd = &cobra.Command{
 		Use: "wallets",
-		Long: "Manage the wallets of a profile",
+		Short: "Manage the wallets of a profile",
 	}
 
 	walletArgs = []string{"profileID", "chainID", "walletID"}

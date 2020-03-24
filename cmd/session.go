@@ -7,10 +7,6 @@ import (
 	"time"
 )
 
-// todo we might restore a session entirely from file
-// TODO override single flags of using file
-// TODO all the flags containing network, account, etc to use
-// TODo clean session cached objects
 var (
 	deleteSession bool
 
