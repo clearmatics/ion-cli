@@ -1,0 +1,10 @@
+{
+	"max": {
+		"name": "max",
+		"networks": {}
+	},
+	"test": {
+		"name": "test",
+		"networks": {}
+	}
+}

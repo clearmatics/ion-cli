@@ -1,0 +1,15 @@
+{
+  "accounts": {
+    "andrea": {
+      "keyfile": "keyfile",
+      "name": "andrea",
+      "password": "password"
+    }
+  },
+  "networks": {
+    "local": {
+      "name": "local",
+      "url": "localhost"
+    }
+  }
+}
