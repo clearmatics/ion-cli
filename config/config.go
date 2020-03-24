@@ -1,7 +1,7 @@
 // Copyright (c) 2018 Clearmatics Technologies Ltd
 
 package config
-
+// TODO to be deleted once all the old cli under cli/ is refactored or won-t build
 import (
 	"encoding/json"
 	"fmt"

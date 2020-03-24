@@ -8,7 +8,7 @@ import (
 
 type Profile struct {
 	Name string `json:"name"`
-	Chains Chains`json:"networks"`
+	Chains Chains`json:"chains"`
 }
 
 type Profiles map[string]Profile
@@ -46,7 +46,9 @@ func (p Profiles) Add (profileId string) {
 
 // remove profile with profiledId from profiles
 func (p Profiles) Remove (profileId string) {
-	delete(p, profileId)
+	if p.Exist(profileId) {
+		delete(p, profileId)
+	}
 }
 
 

@@ -11,7 +11,7 @@ var (
 
 	addNetworkArgs = []string{"networkID", "URLs"}
 	delNetworkArgs = []string{"networkID"}
-	
+
 	networkCmd = &cobra.Command{
 		Use: "networks",
 		Short: "Manage networks in your configs",

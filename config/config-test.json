@@ -10,6 +10,10 @@
     "local": {
       "name": "local",
       "url": "localhost"
+    },
+    "prova": {
+      "name": "prova",
+      "url": "provaURL"
     }
   }
 }

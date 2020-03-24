@@ -55,7 +55,7 @@ var(
 			}
 
 			// choose profile to use
-			initProfile()
+			//initProfile()
 		},
 
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -109,7 +109,7 @@ func initProfile() {
 	}
 
 	// TODO how about no profiles?
-	fmt.Println(activeProfile)
+	//fmt.Println(activeProfile)
 }
 
 

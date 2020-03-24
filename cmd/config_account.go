@@ -36,7 +36,7 @@ var (
 
 				fmt.Println(fmt.Sprintf("Creating account %v with the provided info", accountID))
 
-				configs.Set("accounts." + accountID, backend.WalletInfo{
+				configs.Set("accounts." + accountID, backend.Account{
 					Name: accountID,
 					Keyfile: keyFile,
 					Password: password,

@@ -12,18 +12,18 @@ import (
 )
 
 // an account info as stored in the configs
-type WalletInfo struct {
+type Account struct {
 	Name     string `json:"name"`
 	Keyfile  string `json:"keyfile"`
 	Password string `json:"password"`
 }
-type Accounts map[string]WalletInfo
+type Accounts map[string]Account
 
 func (a Accounts) Exist(id string) bool {
 	return a[id].Name != ""
 }
 
-func (a Accounts) Add (id string, account WalletInfo) {
+func (a Accounts) Add (id string, account Account) {
 	a[id] = account
 }
 
@@ -32,7 +32,7 @@ func (a Accounts) Remove (id string) {
 }
 
 // initialize a wallet ready to be used to transact
-func (a WalletInfo) Unlock() (Wallet, error) {
+func (a Account) Unlock() (Wallet, error) {
 
 	w := Wallet{}
 

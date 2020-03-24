@@ -6,13 +6,19 @@ import (
 	"strings"
 )
 
-// profileCmd represents the profile command
+/* PROFILES */
+
 var (
 
-	/* PROFILES */
 	profileCmd = &cobra.Command{
 		Use: "profile",
 		Long: "Manage the profiles to interact with ION",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return loadProfiles(profilesPath)
+		},
+		PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+			return profiles.Save(profilesPath)
+		},
 	}
 
 	profileArgs = []string{"profileID"}
@@ -27,33 +33,37 @@ var (
 
 			profileId := args[0]
 
-			returnIfError(loadProfiles(profilesPath))
-
 			if profiles.Exist(profileId) {
 
-				if deleteFlag {
-					fmt.Println("Deleting profile", profileId)
-					profiles.Remove(profileId)
-				} else {
-					fmt.Println("This profile already exist:\n", profiles[profileId])
-				}
+				fmt.Println("This profile already exist:\n", profiles[profileId])
 
 			} else {
 				fmt.Println("Creating a profile named", profileId)
 				profiles.Add(profileId)
 			}
 
-			profiles.Save(profilesPath)
 		},
 	}
 
+	delProfileCmd = &cobra.Command{
+		Use:   "del [" + strings.Join(profileArgs, ",") + "]",
+		Short: "Delete a profile",
+		Run: func(cmd *cobra.Command, args []string) {
+			profileId := args[0]
+
+			fmt.Println("Deleting profile", profileId)
+			profiles.Remove(profileId)
+
+		},
+	}
 )
 
 func init() {
-	addProfileCmd.Flags().BoolVarP(&deleteFlag, "delete", "d", false, "Delete the specified profile")
 
 	// tree of commands
 	profileCmd.AddCommand(addProfileCmd)
+	profileCmd.AddCommand(delProfileCmd)
+
 	rootCmd.AddCommand(profileCmd)
 }
 
