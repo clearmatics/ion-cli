@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
 	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -15,6 +17,8 @@ import (
 var(
 	// flags
 	Verbose bool
+	docFlag bool
+	outputDir string
 	sessionPath string
 	configPath string
 	profilesPath string
@@ -35,9 +39,25 @@ var(
 		Long: "Ion is a system and function-agnostic framework for building cross-interacting smart contracts between blockchains and/or systems",
 
 		Run: func(cmd *cobra.Command, args []string) {
+
+			// generate docs
+			if docFlag {
+				fmt.Println("Generating documentation at", outputDir)
+
+				if _, err := os.Stat(outputDir); err != nil {
+					fmt.Println("Output path didn't exist. Creating the folder..")
+					returnIfError(os.Mkdir(outputDir, 0777))
+				}
+
+				returnIfError(doc.GenMarkdownTree(cmd, outputDir))
+				fmt.Println("Success!")
+				return
+			}
+
 			// choose profile to use
 			initProfile()
 		},
+
 		Args: func(cmd *cobra.Command, args []string) error {
 			// this to validate positional arguments
 			return nil
@@ -58,8 +78,10 @@ func init(){
 	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "s", "./config/session-test.json", "Session file path")
 	rootCmd.PersistentFlags().StringVarP(&profilesPath, "profiles", "", "./config/profiles-test.json", "Profiles file path")
 
-	rootCmd.Flags().StringVarP(&profileName, "profile", "p", "", "The profile name the configs will be taken from")
+	rootCmd.Flags().StringVarP(&outputDir, "outputDir", "o", "./docs", "The output directory the docs will be written into")
+	rootCmd.Flags().BoolVarP(&docFlag, "docgen", "", false, "Generate documentation of the whole command tree")
 
+	rootCmd.Flags().StringVarP(&profileName, "profile", "p", "", "The profile name the configs will be taken from")
 }
 
 func initProfile() {

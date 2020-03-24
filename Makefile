@@ -10,6 +10,9 @@ HASH             := $(shell git rev-parse HEAD)
 VERSION_FLAGS    := -ldflags='-X "main.BuildVersion=$(VERSION)" -X "main.BuildDateTime=$(DATE)" -X "main.CommitHash=$(HASH)"'
 
 
+documentation: build
+	@$(TARGET_BINARY) --docgen
+
 clean:
 	@rm -f ion-cli
 
