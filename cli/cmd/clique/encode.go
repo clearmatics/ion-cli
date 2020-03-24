@@ -8,7 +8,7 @@ import (
 )
 
 func rlpEncodeClique(blockHeader *types.Header) (rlpSignedBlock []byte, rlpUnsignedBlock []byte, err error) {
-	// Encode the orginal block header
+
 	_, err = rlp.EncodeToBytes(&blockHeader)
 	if err != nil {
 		fmt.Println("can't RLP encode requested block:", err)

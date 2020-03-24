@@ -10,11 +10,20 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/rpc"
 )
 
 // Client gets client or fails if no connection
 func Client(url string) (*ethclient.Client, error) {
 	return ethclient.Dial(url)
+}
+// ClientRPC RPC Client gets an RPC client (useful to get the block number out of a transaction)
+func ClientRPC(url string) *rpc.Client {
+	c, err := rpc.DialContext(context.Background(), url)
+	if err != nil {
+		log.Fatal("RPC Client failed to connect: ", err)
+	}
+	return c
 }
 
 func GetBlockHeaderByNumber(client *ethclient.Client, blockNum *big.Int) (*types.Header, []byte, error) {
