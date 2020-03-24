@@ -11,6 +11,7 @@ VERSION_FLAGS    := -ldflags='-X "main.BuildVersion=$(VERSION)" -X "main.BuildDa
 
 
 documentation: build
+	@rm -f ./docs/*
 	@$(TARGET_BINARY) --docgen
 
 clean:
