@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
 	"github.com/clearmatics/ion-cli/backend/ethereum"
@@ -22,22 +23,16 @@ var (
 		Long:  `Allow to retrieve a block through a rpc call, either by number or by hash, rlp encoded or as object`,
 		Run: func(cmd *cobra.Command, args []string) {
 
-			// define which block type // TODO should go into the network configs
-			switch blockType {
-			case "eth":
-				block = &ethereum.EthBlockHeader{}
-			case "clique":
-				block = &ethereum.CliqueBlockHeader{}
-			default:
-				// TODO
-				fmt.Println("This block type is not recognised. Availables are..")
-				return
-			}
-
 			if !activeProfile.Chains.Exist(chain) {
 				fmt.Println(fmt.Sprintf("The chain %v doesn't exists for profile %v", chain, activeProfile.Name))
 				return
 			}
+
+			// assign the type implementing the block interface in the chain
+			returnIfError(assignBlockImplementer())
+
+			// pointer
+			block  = activeProfile.Chains[chain].Blocks["latest"]
 
 			// rpc call
 			if !byHash {
@@ -60,14 +55,8 @@ var (
 				returnIfError(err)
 			}
 
-			// add block to profile
-			// TODO we might store multiple blocks depending on some counter or smt
-			activeProfile.Chains[chain].Blocks["latest"] = block
-
-			// update the profiles
+			// persist the updates on the active profile
 			returnIfError(profiles.Save(profilesPath))
-
-			fmt.Println("Success! Profile updated with the block info")
 		},
 	}
 )
@@ -83,5 +72,20 @@ func init() {
 	getBlockCmd.Flags().StringVarP(&chain, "chain", "c", "local", "Chain identifier in the profile")
 
 	rootCmd.AddCommand(getBlockCmd)
+
+}
+
+func assignBlockImplementer() error {
+
+	switch activeProfile.Chains[chain].Network.Header {
+	case "eth":
+		activeProfile.Chains[chain].Blocks["latest"] = &ethereum.EthBlockHeader{}
+	case "clique":
+		activeProfile.Chains[chain].Blocks["latest"] = &ethereum.CliqueBlockHeader{}
+	default:
+		return errors.New(fmt.Sprintf("The block type %v in chain %v is not recognised.", activeProfile.Chains[chain].Network.Header, chain))
+	}
+
+	return nil
 
 }

@@ -9,7 +9,7 @@ import (
 
 var (
 
-	addNetworkArgs = []string{"networkID", "URLs"}
+	addNetworkArgs = []string{"networkID", "URL", "Header Type"}
 	delNetworkArgs = []string{"networkID"}
 
 	networkCmd = &cobra.Command{
@@ -26,18 +26,20 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			networkId := args[0]
 			networkURL := args[1]
+			networkBlockHeader := args[2]
 
-			if !configs.IsSet("networks." + networkId) {
+			if !configs.IsSet("networks." + networkId) || forceFlag {
 
 				fmt.Println(fmt.Sprintf("Creating network %v with the provided info", networkId))
 
 				configs.Set("networks." + networkId, backend.NetworkInfo{
 					Name: networkId,
 					Url:  networkURL,
+					Header: networkBlockHeader,
 				})
 
 			} else {
-				fmt.Println(fmt.Sprintf("The network with id %v already exists!", networkId))
+				fmt.Println(fmt.Sprintf(  "The network with id %v already exists! Use flag -f to overwrite it", networkId))
 				return
 			}
 

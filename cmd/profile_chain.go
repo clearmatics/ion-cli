@@ -31,18 +31,22 @@ var (
 			chainId := args[1]
 			networkId := args[2]
 
-
 			if profiles.Exist(profileId) {
 
-				fmt.Println(fmt.Sprintf("Creating chain %v in profile %v", chainId, profileId))
-				returnIfError(loadConfig(configPath))
+				if profiles[profileId].Chains.Exist(chainId) || forceFlag {
+					fmt.Println(fmt.Sprintf("Creating chain %v in profile %v", chainId, profileId))
+					returnIfError(loadConfig(configPath))
 
-				network := backend.NetworkInfo{}
-				returnIfError(configs.UnmarshalKey("networks." + networkId, &network))
+					network := backend.NetworkInfo{}
+					returnIfError(configs.UnmarshalKey("networks." + networkId, &network))
 
-				profiles[profileId].Chains.Add(chainId, network)
+					profiles[profileId].Chains.Add(chainId, network)
+				} else {
+					fmt.Println(fmt.Sprintf("Chain with id %v already exists! Use flag -f to overwrite it", chainId))
+				}
+
 			} else {
-				fmt.Println("This profile does not exists yet! Initialize it first  it first")
+				fmt.Println("This profile does not exists yet! Initialize it first")
 				// TODO or we can initialize it here
 			}
 		},

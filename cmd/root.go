@@ -24,6 +24,7 @@ var(
 	profilesPath string
 	profileName string
 	deleteFlag bool
+	forceFlag bool
 
 	// global variable to all commands
 	activeProfile backend.Profile
@@ -80,6 +81,7 @@ func init(){
 	rootCmd.Flags().BoolVarP(&docFlag, "docgen", "", false, "Generate documentation of the whole command tree")
 
 	rootCmd.PersistentFlags().StringVarP(&profileName, "profile", "p", "", "The profile name the configs will be taken from")
+	rootCmd.PersistentFlags().BoolVarP(&forceFlag, "force", "f", false, "Overwrites objects that already exist")
 
 	// choose profile to use
 	initProfile()

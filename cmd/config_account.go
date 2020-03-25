@@ -32,7 +32,7 @@ var (
 			keyFile := args[1]
 			password := args[2]
 
-			if !configs.IsSet("accounts." + accountID) {
+			if !configs.IsSet("accounts." + accountID) || forceFlag {
 
 				fmt.Println(fmt.Sprintf("Creating account %v with the provided info", accountID))
 
@@ -46,7 +46,7 @@ var (
 				fmt.Println("Success!")
 
 			} else {
-				fmt.Println(fmt.Sprintf("The account with id %v already exists!", accountID))
+				fmt.Println(fmt.Sprintf("The account with id %v already exists! Use flag -f to overwrite it", accountID))
 				return
 			}
 
