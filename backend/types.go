@@ -30,4 +30,5 @@ type Wallet struct {
 type NetworkInfo struct {
 	Name string `json:"name"`
 	Url string `json:"url"`
+
 }

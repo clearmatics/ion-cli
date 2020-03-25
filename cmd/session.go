@@ -7,13 +7,14 @@ import (
 	"time"
 )
 
+// TODO use command format as profile and config
 var (
 	deleteSession bool
 
 	sessionCmd = &cobra.Command{
 		Use:   "session",
 		Short: "Manage a session within ION",
-		Long:  "Allow to create, restore or delete a session file further calls would read the configs from and populate with needed data for other calls:",
+		Long:  "A session keeps track of the latest profile using ION and will use that as default for all calls",
 		Run: func(cmd *cobra.Command, args []string) {
 
 			if deleteSession {

@@ -10,7 +10,8 @@ HASH             := $(shell git rev-parse HEAD)
 VERSION_FLAGS    := -ldflags='-X "main.BuildVersion=$(VERSION)" -X "main.BuildDateTime=$(DATE)" -X "main.CommitHash=$(HASH)"'
 
 
-documentation: build
+documentation:
+    # Generate documentation
 	@rm -f ./docs/*
 	@$(TARGET_BINARY) --docgen
 
@@ -32,7 +33,7 @@ modules:
 
 build: modules
 	# Build project
-	@go build $(VERSION_FLAGS) -o $(TARGET_BINARY)
+	@go build $(VERSION_FLAGS) -o $(TARGET_BINARY) && make documentation
 
 check:
 	@if [ -n "$(shell gofmt -l ${PACKAGES})" ]; then \

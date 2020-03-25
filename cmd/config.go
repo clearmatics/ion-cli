@@ -10,7 +10,7 @@ var (
 	/* CONFIGS */
 	configsCmd = &cobra.Command{
 		Use:   "config",
-		Short: "",
+		Short: "Manage the configs as sets of accounts and networks",
 		// this will be run before each config subcommand to avoid loading the configs in multiple places
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// load configs

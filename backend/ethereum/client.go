@@ -28,17 +28,25 @@ func GetClient(url string) (*EthClient, error) {
 	return &client, err
 }
 
-func (eth *EthClient) GetBlockByNumber(number string) (*types.Header, []byte, error) {
-	// var blockHeader header
-	blockNum := new(big.Int)
-	blockNum.SetString(number, 10)
+func (eth *EthClient) GetBlockByNumber(number string) (block *types.Header, b []byte, err error) {
 
-	block, err := eth.client.HeaderByNumber(context.Background(), blockNum)
-	if err != nil {
-		return nil, nil, err
+	if number == "latest" {
+		err = eth.rpcClient.Call(&block, "eth_getBlockByNumber", "latest", false)
+		if err != nil {
+			return nil, nil, err
+		}
+	} else {
+		blockNum := new(big.Int)
+		blockNum.SetString(number, 10)
+
+		block, err = eth.client.HeaderByNumber(context.Background(), blockNum)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
+
 	// Marshal into a JSON
-	b, err := json.MarshalIndent(block, "", " ")
+	b, err = json.MarshalIndent(block, "", " ")
 	if err != nil {
 		return nil, nil, err
 	}

@@ -50,5 +50,3 @@ func (p Profiles) Remove (profileId string) {
 		delete(p, profileId)
 	}
 }
-
-

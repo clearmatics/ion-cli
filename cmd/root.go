@@ -54,8 +54,6 @@ var(
 				return
 			}
 
-			// choose profile to use
-			//initProfile()
 		},
 
 		Args: func(cmd *cobra.Command, args []string) error {
@@ -74,14 +72,17 @@ func init(){
 
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "c", "./config/config-test.json", "Configs file path")
-	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "s", "./config/session-test.json", "Session file path")
+	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "", "./config/config-test.json", "Configs file path")
+	rootCmd.PersistentFlags().StringVarP(&sessionPath, "session", "", "./config/session-test.json", "Session file path")
 	rootCmd.PersistentFlags().StringVarP(&profilesPath, "profiles", "", "./config/profiles-test.json", "Profiles file path")
 
 	rootCmd.Flags().StringVarP(&outputDir, "outputDir", "o", "./docs", "The output directory the docs will be written into")
 	rootCmd.Flags().BoolVarP(&docFlag, "docgen", "", false, "Generate documentation of the whole command tree")
 
-	rootCmd.Flags().StringVarP(&profileName, "profile", "p", "", "The profile name the configs will be taken from")
+	rootCmd.PersistentFlags().StringVarP(&profileName, "profile", "p", "", "The profile name the configs will be taken from")
+
+	// choose profile to use
+	initProfile()
 }
 
 func initProfile() {
@@ -108,8 +109,9 @@ func initProfile() {
 		}
 	}
 
-	// TODO how about no profiles?
-	//fmt.Println(activeProfile)
+	if activeProfile.Name == "" {
+		fmt.Println("No active profile in use..")
+	}
 }
 
 

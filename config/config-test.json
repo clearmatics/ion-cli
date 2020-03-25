@@ -9,11 +9,15 @@
   "networks": {
     "local": {
       "name": "local",
-      "url": "localhost"
+      "url": "http://127.0.0.1:8545"
     },
     "prova": {
       "name": "prova",
       "url": "provaURL"
+    },
+    "rinkeby": {
+      "name": "rinkeby",
+      "url": "https://rinkeby.infura.io/v3/430e7d9d2b104879aee73ced56f0b8ba"
     }
   }
 }

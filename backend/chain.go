@@ -25,8 +25,8 @@ func (c Chains) Exist(id string) bool {
 func (c Chains) Add (id string, network NetworkInfo) {
 	c[id] = Chain{
 		Network:     network,
-		Accounts:    make(map[string]Account),
-		Blocks:      nil,
+		Accounts:    Accounts{},
+		Blocks:      BlockMap{},
 		Transaction: Transaction{},
 	}
 }

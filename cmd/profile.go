@@ -12,7 +12,7 @@ var (
 
 	profileCmd = &cobra.Command{
 		Use: "profile",
-		Long: "Manage the profiles to interact with ION",
+		Short: "Manage the profiles to interact with ION",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			return loadProfiles(profilesPath)
 		},
