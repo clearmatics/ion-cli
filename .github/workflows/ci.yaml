@@ -24,7 +24,6 @@ jobs:
           export GOPRIVATE="github.com/clearmatics"
           git config --global url."https://${{ secrets.GITHUB_USER }}:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
           go install github.com/golangci/golangci-lint/cmd/golangci-lint
-          make documentation
           make lint
           make build
           make test
