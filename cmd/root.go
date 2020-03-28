@@ -85,12 +85,14 @@ func init(){
 
 	// choose profile to use
 	initProfile()
+
+	return
 }
 
 func initProfile() {
 
 	returnIfError(loadProfiles(profilesPath))
-
+	//fmt.Println(profiles)
 	// if profile flag is set use that if it's a valid profile
 	if profiles.Exist(profileName){
 		fmt.Println("Using profile", profileName, "from the flag")
@@ -114,6 +116,7 @@ func initProfile() {
 	if activeProfile.Name == "" {
 		fmt.Println("No active profile in use..")
 	}
+
 }
 
 

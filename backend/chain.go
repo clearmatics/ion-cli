@@ -6,7 +6,7 @@ type Chain struct {
 	Accounts Accounts `json:"accounts"`
 
 	// cache
-	Blocks BlockMap `json:"blocks"`
+	Block Block `json:"block"`
 	Transaction Transaction `json:"transaction"`
 
 	// ion proofs
@@ -14,7 +14,7 @@ type Chain struct {
 	// contract addresses
 }
 
-type Chains map[string]Chain
+type Chains map[string]*Chain
 
 // tells if a chain with id exists
 func (c Chains) Exist(id string) bool {
@@ -23,11 +23,11 @@ func (c Chains) Exist(id string) bool {
 
 // add a chain object with id id
 func (c Chains) Add (id string, network NetworkInfo) {
-	c[id] = Chain{
+	c[id] = &Chain{
 		Network:     network,
 		Accounts:    Accounts{},
-		Blocks:      BlockMap{},
 		Transaction: Transaction{},
+		Block:Block{},
 	}
 }
 

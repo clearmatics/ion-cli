@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/clearmatics/ion-cli/backend"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
@@ -27,8 +28,11 @@ func loadConfig(configPath string) error {
 }
 
 func loadProfiles(profilesPath string) error {
+	profiles = backend.Profiles{}
 	b, _ := ioutil.ReadFile(profilesPath)
-	return json.Unmarshal(b, &profiles)
+	err := json.Unmarshal(b, &profiles)
+
+	return err
 }
 
 func checkArgs(args []string, expected []string) error {

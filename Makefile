@@ -33,7 +33,7 @@ modules:
 
 build: modules
 	# Build project
-	@go build $(VERSION_FLAGS) -o $(TARGET_BINARY) && make documentation
+	@go build $(VERSION_FLAGS) -o $(TARGET_BINARY)
 
 check:
 	@if [ -n "$(shell gofmt -l ${PACKAGES})" ]; then \

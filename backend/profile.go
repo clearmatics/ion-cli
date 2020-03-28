@@ -17,13 +17,13 @@ type Profiles map[string]Profile
 func (p Profiles) Save(path string) error {
 	b, err := json.MarshalIndent(p, "", "	")
 	if err != nil {
-		fmt.Errorf("error marshaling the session object")
+		fmt.Errorf("error marshaling the profile object")
 		return err
 	}
 
 	err = ioutil.WriteFile(path, b, 0644)
 	if err != nil {
-		fmt.Errorf("error updating the session file")
+		fmt.Errorf("error updating the profile file")
 		return err
 	}
 
@@ -40,7 +40,7 @@ func (p Profiles) Exist(id string) bool {
 func (p Profiles) Add (profileId string) {
 	p[profileId] = Profile{
 		Name:   profileId,
-		Chains: make(map[string]Chain),
+		Chains: Chains{},
 	}
 }
 

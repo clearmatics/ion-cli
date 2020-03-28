@@ -2,24 +2,32 @@ package ethereum
 
 import (
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/core/types"
 )
 
-// Implements the standard Block Interface of the session object
+// Implements the standard Block Interface of the profile object
 type EthBlockHeader struct {
 	Header     *types.Header 	 `json:"header"`
-	RlpEncoded []byte        `json:"rlp_encoded"`
+	RlpEncoded string        `json:"rlp_encoded"`
+}
+
+// marshal itself so that the
+func (b *EthBlockHeader) Marshal() (header []byte, err error) {
+	return json.Marshal(b)
 }
 
 // calculate and assign the rlp form of the header
 func (b *EthBlockHeader) RlpEncode() (err error) {
-	b.RlpEncoded, err = rlp.EncodeToBytes(&b.Header)
+	rlpH, err := rlp.EncodeToBytes(&b.Header)
 	if err != nil {
 		fmt.Println("can't RLP encode requested block:", err)
 		return err
 	}
+
+	b.RlpEncoded = hex.EncodeToString(rlpH)
 
 	return nil
 }
@@ -27,8 +35,7 @@ func (b *EthBlockHeader) RlpEncode() (err error) {
 func (b *EthBlockHeader) GetByNumber(rpcURL string, number string) (err error) {
 	fmt.Println("Connecting to the RPC client..")
 
-	eth, err := GetClient(rpcURL)
-	//returnIfError(err)
+	eth, _ := GetClient(rpcURL)
 
 	b.Header, _, err = eth.GetBlockByNumber(number)
 	if err != nil {
@@ -39,12 +46,12 @@ func (b *EthBlockHeader) GetByNumber(rpcURL string, number string) (err error) {
 }
 
 func (b *EthBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
-	fmt.Println("Connecting to the RPC client..")
+	fmt.Println("Connecting to the RPC client..", rpcURL)
 
-	eth, err := GetClient(rpcURL)
-	//returnIfError(err)
+	eth, _ := GetClient(rpcURL)
 
 	b.Header, _, err = eth.GetBlockByHash(hash)
+
 	if err != nil {
 		return err
 	}
@@ -56,5 +63,6 @@ func (b *EthBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
 
 // TODO if needed
 func (b EthBlockHeader) String() string{
-	return fmt.Sprintf(hex.EncodeToString(b.Header.Extra))
+	//return fmt.Sprintf(hex.EncodeToString(b.Header.Extra))
+	return "ok"
 }
