@@ -13,6 +13,10 @@ type Profile struct {
 
 type Profiles map[string]Profile
 
+func (p Profile) IsActive() bool {
+	return len(p.Chains) > 0
+}
+
 // store all the profiles to disk
 func (p Profiles) Save(path string) error {
 	b, err := json.MarshalIndent(p, "", "	")

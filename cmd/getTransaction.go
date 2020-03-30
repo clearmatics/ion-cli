@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/clearmatics/ion-cli/backend/ethereum"
 	"github.com/spf13/cobra"
 	"strings"
 )
@@ -9,6 +10,7 @@ import (
 
 var (
 	txHash   string
+	rpcURL string
 
 	getTxArgs = []string{"transaction Hash"}
 	getTransactionCmd = &cobra.Command{
@@ -20,6 +22,13 @@ var (
 			return checkArgs(args, getTxArgs)
 		},
 		Run: func(cmd *cobra.Command, args []string) {
+			txHash := args[0]
+
+			// if no active profiles just do a on the fly call and print the output
+			if !activeProfile.IsActive() {
+				runWithNoProfiles(txHash)
+				return
+			}
 
 			if !activeProfile.Chains.Exist(chain) {
 				fmt.Println(fmt.Sprintf("The chain %v doesn't exists for profile %v", chain, activeProfile.Name))
@@ -30,7 +39,6 @@ var (
 			returnIfError(assignChainImplementers(activeProfile.Chains[chain].Type))
 
 			activeChain := activeProfile.Chains[chain]
-			txHash := args[0]
 
 			fmt.Println("Retrieving and generating ION proof for tx:", txHash)
 			err := activeChain.Transaction.Interface.GenerateIonProof(activeChain.Network.Url, txHash)
@@ -40,9 +48,8 @@ var (
 			activeChain.Transaction.Tx, err = activeChain.Transaction.Interface.Marshal()
 			returnIfError(err)
 
-			activeProfile.Chains[chain] = activeChain
-
 			// persist the updates on the active profile
+			activeProfile.Chains[chain] = activeChain
 			returnIfError(profiles.Save(profilesPath))
 		},
 	}
@@ -50,8 +57,22 @@ var (
 
 func init() {
 	getTransactionCmd.Flags().StringVarP(&chain, "chain", "c", "local", "Chain identifier in the profile")
+	getTransactionCmd.Flags().StringVarP(&rpcURL, "rpc", "", "", "URL of the rpc endpoint")
 
 	getTransactionCmd.MarkFlagRequired("hash")
+
+	
 	rootCmd.AddCommand(getTransactionCmd)
 
 }
+
+func runWithNoProfiles(txHash string) {
+	transactionObj := ethereum.EthTransaction{
+		Tx:    nil,
+		Proof: "",
+	}
+	returnIfError(transactionObj.GenerateIonProof(rpcURL, txHash))
+
+	fmt.Println("Success! Here's the proof", transactionObj.Proof)
+}
+

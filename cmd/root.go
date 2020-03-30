@@ -81,6 +81,7 @@ func init(){
 	rootCmd.Flags().BoolVarP(&docFlag, "docgen", "", false, "Generate documentation of the whole command tree")
 
 	rootCmd.PersistentFlags().StringVarP(&profileName, "profile", "p", "", "The profile name the configs will be taken from")
+
 	rootCmd.PersistentFlags().BoolVarP(&forceFlag, "force", "f", false, "Overwrites objects that already exist")
 
 	// choose profile to use
@@ -92,7 +93,7 @@ func init(){
 func initProfile() {
 
 	returnIfError(loadProfiles(profilesPath))
-	//fmt.Println(profiles)
+
 	// if profile flag is set use that if it's a valid profile
 	if profiles.Exist(profileName){
 		fmt.Println("Using profile", profileName, "from the flag")
@@ -112,11 +113,6 @@ func initProfile() {
 			activeProfile = profiles[session.Profile]
 		}
 	}
-
-	if activeProfile.Name == "" {
-		fmt.Println("No active profile in use..")
-	}
-
 }
 
 

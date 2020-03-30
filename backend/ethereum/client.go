@@ -12,16 +12,16 @@ import (
 )
 
 type EthClient struct {
-	client    *ethclient.Client
-	rpcClient *rpc.Client
-	url       string
+	Client    *ethclient.Client
+	RpcClient *rpc.Client
+	Url       string
 }
 
 func GetClient(url string) (*EthClient, error) {
 	rpc := utils.ClientRPC(url)
 	eth := ethclient.NewClient(rpc)
 
-	client := EthClient{client: eth, rpcClient: rpc, url: url}
+	client := EthClient{Client: eth, RpcClient: rpc, Url: url}
 
 	_, _, err := client.GetBlockByNumber("0")
 
@@ -31,7 +31,7 @@ func GetClient(url string) (*EthClient, error) {
 func (eth *EthClient) GetBlockByNumber(number string) (block *types.Header, b []byte, err error) {
 
 	if number == "latest" {
-		err = eth.rpcClient.Call(&block, "eth_getBlockByNumber", "latest", false)
+		err = eth.RpcClient.Call(&block, "eth_getBlockByNumber", "latest", false)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -39,7 +39,7 @@ func (eth *EthClient) GetBlockByNumber(number string) (block *types.Header, b []
 		blockNum := new(big.Int)
 		blockNum.SetString(number, 10)
 
-		block, err = eth.client.HeaderByNumber(context.Background(), blockNum)
+		block, err = eth.Client.HeaderByNumber(context.Background(), blockNum)
 		if err != nil {
 			return nil, nil, err
 		}
@@ -56,7 +56,7 @@ func (eth *EthClient) GetBlockByNumber(number string) (block *types.Header, b []
 func (eth *EthClient) GetBlockByHash(hash string) (*types.Header, []byte, error) {
 	blockHash := common.HexToHash(hash)
 
-	block, err := eth.client.HeaderByHash(context.Background(), blockHash)
+	block, err := eth.Client.HeaderByHash(context.Background(), blockHash)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -71,7 +71,7 @@ func (eth *EthClient) GetBlockByHash(hash string) (*types.Header, []byte, error)
 func (eth *EthClient) GetTransactionByHash(hash string) (*types.Transaction, []byte, error) {
 	txHash := common.HexToHash(hash)
 
-	tx, _, err := eth.client.TransactionByHash(context.Background(), txHash)
+	tx, _, err := eth.Client.TransactionByHash(context.Background(), txHash)
 	if err != nil {
 		return nil, nil, err
 	}

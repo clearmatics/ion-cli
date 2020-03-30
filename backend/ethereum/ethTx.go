@@ -22,7 +22,7 @@ func (tx *EthTransaction) GenerateIonProof(rpcURL string, hash string) error {
 	}
 
 	txHash := common.HexToHash(hash)
-	data, err := utils.FetchProofData(eth.client, txHash)
+	data, err := utils.FetchProofData(eth.Client, txHash)
 	if err != nil {
 		return err
 	}
