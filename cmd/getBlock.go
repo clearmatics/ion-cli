@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
-	"github.com/clearmatics/ion-cli/backend/ethereum"
 	"github.com/spf13/cobra"
 )
 
@@ -29,7 +27,7 @@ var (
 			}
 
 			// assign the type implementing the block interface in the chain
-			returnIfError(assignBlockImplementer(blockType))
+			returnIfError(assignChainImplementers(activeProfile.Chains[chain].Type))
 
 			activeChain := activeProfile.Chains[chain]
 
@@ -54,8 +52,8 @@ var (
 				returnIfError(err)
 			}
 
+			// marshal the typed header into json raw format that will be saved to file
 			activeChain.Block.Header, err = activeChain.Block.Interface.Marshal()
-			activeChain.Block.Type = blockType
 
 			returnIfError(err)
 
@@ -72,7 +70,6 @@ func init() {
 	getBlockCmd.Flags().BoolVarP(&rlpEncoded, "rlp", "", false, "Specify if the returned block header should be rlp encoded or not")
 	getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "", false, "Specify if reading the block by number or by hash")
 	getBlockCmd.Flags().StringVarP(&blockInfo, "block", "b", "latest", "Block number or hash")
-	getBlockCmd.Flags().StringVarP(&blockType, "type", "t", "eth", "Block header type format")
 
 	// to override profile configs if active
 	getBlockCmd.Flags().StringVarP(&chain, "chain", "c", "local", "Chain identifier in the profile")
@@ -81,16 +78,3 @@ func init() {
 
 }
 
-func assignBlockImplementer(blockType string) error {
-	switch blockType {
-	case "eth":
-		activeProfile.Chains[chain].Block.Interface = &ethereum.EthBlockHeader{}
-	case "clique":
-		activeProfile.Chains[chain].Block.Interface = &ethereum.CliqueBlockHeader{}
-	default:
-		return errors.New(fmt.Sprintf("The block type %v is not recognised", blockType))
-	}
-
-	return nil
-
-}

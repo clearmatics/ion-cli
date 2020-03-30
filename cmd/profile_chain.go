@@ -17,7 +17,7 @@ var (
 		Short: "Manage the chains configuration of a profile",
 	}
 
-	chainArgs = []string{"profileID", "chainID", "networkID"}
+	chainArgs = []string{"profileID", "chainID", "networkID", "chainType"}
 	addChainCmd = &cobra.Command{
 		Use:   "add [" + strings.Join(chainArgs, ",") + "]",
 		Short: "Add or delete a chain from a profile",
@@ -30,6 +30,7 @@ var (
 			profileId := args[0]
 			chainId := args[1]
 			networkId := args[2]
+			chainType := args[3]
 
 			if profiles.Exist(profileId) {
 
@@ -40,7 +41,7 @@ var (
 					network := backend.NetworkInfo{}
 					returnIfError(configs.UnmarshalKey("networks." + networkId, &network))
 
-					profiles[profileId].Chains.Add(chainId, network)
+					profiles[profileId].Chains.Add(chainId, network, chainType)
 				} else {
 					fmt.Println(fmt.Sprintf("Chain with id %v already exists! Use flag -f to overwrite it", chainId))
 				}

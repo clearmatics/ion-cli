@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
+	"github.com/clearmatics/ion-cli/backend/ethereum"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
@@ -38,6 +39,21 @@ func loadProfiles(profilesPath string) error {
 func checkArgs(args []string, expected []string) error {
 	if len(args) != len(expected) {
 		return errors.New("invalid args")
+	}
+
+	return nil
+}
+
+func assignChainImplementers(chainType string) error {
+	switch chainType {
+	case "eth":
+		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}
+		activeProfile.Chains[chain].Block.Interface = &ethereum.EthBlockHeader{}
+	case "clique":
+		activeProfile.Chains[chain].Block.Interface = &ethereum.CliqueBlockHeader{}
+		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}
+	default:
+		return errors.New(fmt.Sprintf("The chain type %v is not recognised", blockType))
 	}
 
 	return nil
