@@ -17,7 +17,6 @@ type CliqueBlockHeader struct {
 }
 
 func (b *CliqueBlockHeader) Marshal() (header []byte, err error) {
-
 	return json.Marshal(b)
 }
 // calculate and assign the rlp form of the header

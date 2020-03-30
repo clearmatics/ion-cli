@@ -4,6 +4,7 @@ package backend
 type Chain struct {
 	Network NetworkInfo `json:"network"`
 	Accounts Accounts `json:"accounts"`
+	Type string `json:"type"` // allow to identify block and transaction types of a chain
 
 	// cache
 	Block Block `json:"block"`
@@ -22,10 +23,12 @@ func (c Chains) Exist(id string) bool {
 }
 
 // add a chain object with id id
-func (c Chains) Add (id string, network NetworkInfo) {
+// TODO enum checks on chainType
+func (c Chains) Add (id string, network NetworkInfo, chainType string) {
 	c[id] = &Chain{
 		Network:     network,
 		Accounts:    Accounts{},
+		Type:	chainType,
 		Transaction: Transaction{},
 		Block:Block{},
 	}
