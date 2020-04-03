@@ -82,6 +82,36 @@ func Test_ConvertBool4Array(t *testing.T) {
 	assert.NilError(t, err)
 }
 
+func Test_ConvertBool222Array(t *testing.T) {
+	// All functions have a single non indexed input arg
+	solidityType := compiledTestContract.Abi.Methods["Bool222"].Inputs.NonIndexed()[0].Type
+
+	input := "[[[true,true], [true,true]], [[true, false], [true, false]]]"
+
+	result, err := utils.SolidityToStaticGoType(input, solidityType)
+	assert.NilError(t, err)
+
+	result = result
+
+	_, err = compiledTestContract.Abi.Pack("Bool222", result)
+	assert.NilError(t, err)
+}
+
+func Test_ConvertBool2222Array(t *testing.T) {
+	// All functions have a single non indexed input arg
+	solidityType := compiledTestContract.Abi.Methods["Bool2222"].Inputs.NonIndexed()[0].Type
+
+	input := "[[[[true,true], [true,true]], [[true, false], [true, false]]], [[[true,true], [true,true]], [[true, false], [true, false]]]]"
+
+	result, err := utils.SolidityToStaticGoType(input, solidityType)
+	assert.NilError(t, err)
+
+	result = result
+
+	_, err = compiledTestContract.Abi.Pack("Bool2222", result)
+	assert.NilError(t, err)
+}
+
 /*
 ========================================================================================================================
 	INT TYPE TESTS
@@ -329,6 +359,18 @@ func Test_ConvertInt64_4Array(t *testing.T) {
 
 	result, err := utils.ApplySolidityType(input, expectedType)
 	_, err = compiledTestContract.Abi.Pack("Int64_4", result)
+	assert.NilError(t, err)
+}
+
+func Test_ConvertInt64_22Array(t *testing.T) {
+	// All functions have a single non indexed input arg
+	solidityType := compiledTestContract.Abi.Methods["Int64_22"].Inputs.NonIndexed()[0].Type
+
+	input := "[[5,6],[7,8]]"
+	result, err := utils.SolidityToStaticGoType(input, solidityType)
+	assert.NilError(t, err)
+
+	_, err = compiledTestContract.Abi.Pack("Int64_22", result)
 	assert.NilError(t, err)
 }
 
@@ -826,6 +868,18 @@ func Test_ConvertUint256_4Array(t *testing.T) {
 	assert.NilError(t, err)
 }
 
+func Test_ConvertUint256_22Array(t *testing.T) {
+	// All functions have a single non indexed input arg
+	solidityType := compiledTestContract.Abi.Methods["Uint256_22"].Inputs.NonIndexed()[0].Type
+
+	input := "[[5,6],[7,8]]"
+	result, err := utils.SolidityToStaticGoType(input, solidityType)
+	assert.NilError(t, err)
+
+	_, err = compiledTestContract.Abi.Pack("Uint256_22", result)
+	assert.NilError(t, err)
+}
+
 /*
 ========================================================================================================================
 	ADDRESS TYPE TESTS
@@ -890,6 +944,19 @@ func Test_ConvertAddress_4Array(t *testing.T) {
 	assert.NilError(t, err)
 
 	_, err = compiledTestContract.Abi.Pack("Address4", result)
+	assert.NilError(t, err)
+}
+
+func Test_ConvertAddress_22Array(t *testing.T) {
+	// All functions have a single non indexed input arg
+	solidityType := compiledTestContract.Abi.Methods["Address22"].Inputs.NonIndexed()[0].Type
+
+	input := "[[0xb8844cf76df596e746f360957aa3af954ef51605,0xb8844cf76df596e746f360957aa3af954ef51605],[0xb8844cf76df596e746f360957aa3af954ef51605,0xb8844cf76df596e746f360957aa3af954ef51605]]"
+
+	result, err := utils.SolidityToStaticGoType(input, solidityType)
+	assert.NilError(t, err)
+
+	_, err = compiledTestContract.Abi.Pack("Address22", result)
 	assert.NilError(t, err)
 }
 

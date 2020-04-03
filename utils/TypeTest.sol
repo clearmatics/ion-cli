@@ -8,6 +8,14 @@ contract TypeTest {
     function Bools(bool[] memory input) public {}
     function Bool2(bool[2] memory input) public {}
     function Bool4(bool[4] memory input) public {}
+    function Bool2s(bool[2][] memory input) public {}
+    function Bool4s(bool[4][] memory input) public {}
+    function Bool44s(bool[4][4][] memory input) public {}
+    function Bool222(bool[2][2][2] memory input) public {}
+    function Bool2222(bool[2][2][2][2] memory input) public {}
+    function Bools2(bool[][2] memory input) public {}
+    function Boolss(bool[][] memory input) public {}
+    function Bools2s(bool[][2][] memory input) public {}
 
     function Int8(int8 input) public {}
     function Int8s(int8[] memory input) public {}
@@ -28,6 +36,7 @@ contract TypeTest {
     function Int64s(int64[] memory input) public {}
     function Int64_2(int64[2] memory input) public {}
     function Int64_4(int64[4] memory input) public {}
+    function Int64_22(int64[2][2] memory input) public {}
 
     function Uint8(uint8 input) public {}
     function Uint8s(uint8[] memory input) public {}
@@ -68,11 +77,23 @@ contract TypeTest {
     function Uint256s(uint256[] memory input) public {}
     function Uint256_2(uint256[2] memory input) public {}
     function Uint256_4(uint256[4] memory input) public {}
+    function Uint256_22(uint256[2][2] memory input) public {}
+
+    /*function Fixed(fixed8x8 input) public {}
+    function Fixed64x18(fixed64x18 input) public {}
+    function Fixed128x18(fixed128x18 input) public {}
+    function Fixed256x80(fixed256x80 input) public {}
+
+    function Ufixed(ufixed8x8 input) public {}
+    function Ufixed64x18(ufixed64x18 input) public {}
+    function Ufixed128x18(ufixed128x18 input) public {}
+    function Ufixed256x80(ufixed256x80 input) public {}*/
 
     function Address(address input) public {}
     function Addresses(address[] memory input) public {}
     function Address2(address[2] memory input) public {}
     function Address4(address[4] memory input) public {}
+    function Address22(address[2][2] memory input) public {}
 
     function String(string memory input) public {}
     function Strings(string[] memory input) public {}
@@ -101,6 +122,7 @@ contract TypeTest {
     function Bytes2_2(bytes2[2] memory input) public {}
     function Bytes8_2(bytes8[2] memory input) public {}
     function Bytes32_2(bytes32[2] memory input) public {}
+    function Bytes32_128(bytes32[128] memory input) public {}
 
     function Bytes1_4(bytes1[4] memory input) public {}
     function Bytes2_4(bytes2[4] memory input) public {}

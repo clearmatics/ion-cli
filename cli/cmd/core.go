@@ -2,13 +2,17 @@ package cmd
 
 import (
 	_ "context"
+	"errors"
 	"flag"
 	"fmt"
 	"github.com/abiosoft/ishell"
+	"github.com/apaxa-go/eval"
 	"github.com/clearmatics/ion-cli/cli/core"
 	"github.com/clearmatics/ion-cli/config"
 	"github.com/clearmatics/ion-cli/contracts"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
+	"reflect"
+	"regexp"
 
 	"github.com/clearmatics/ion-cli/utils"
 	"github.com/ethereum/go-ethereum/accounts/abi"
@@ -20,6 +24,77 @@ import (
 
 func CoreCommands(session *core.Session) []*ishell.Cmd {
 	return []*ishell.Cmd{
+		{
+			Name: "typeCast",
+			Help: "use: \ttypeCast -contract -function -value\n\t\t\t\tdescription: Takes first argument of specified contract function and converts value to the argument type",
+			Func: func(c *ishell.Context) {
+
+				flagSet := flag.NewFlagSet("typeCast", flag.ContinueOnError)
+				contractName := flagSet.String("contract", "", "Name of compiled contract to deploy")
+				functionName := flagSet.String("function", "", "Name of account to deploy from")
+				value := flagSet.String("value", "", "Name of client to deploy to")
+
+				if err := flagSet.Parse(c.Args); err == nil {
+					if flagSet.NFlag() != 3 {
+						flagSet.Usage()
+						return
+					}
+
+					if _, ok := session.Contracts[*contractName]; !ok {
+						c.Println(fmt.Sprintf("Contract %s not recognised. Please use addContractInstance to add a new contract or specify a correct contract name.", *contractName))
+						return
+					}
+
+					contract := session.Contracts[*contractName]
+					method, ok := contract.Abi.Methods[*functionName]
+					if !ok {
+						c.Println(fmt.Sprintf("function %s of contract %s not found", *functionName, *contractName))
+						return
+					}
+
+					firstInput := method.Inputs[0]
+
+					r, err := solidityToStaticGoType(*value, firstInput.Type)
+					if err != nil {
+						c.Println(err.Error())
+						return
+					}
+
+					c.Println(r)
+					c.Println(reflect.TypeOf(r))
+
+					inputs, err := stringToArray(*value)
+					if err != nil {
+						c.Println(err.Error())
+						return
+					}
+
+					//result, err := convertToGoType(inputs, r)
+					//if err != nil {
+					//	c.Println(err.Error())
+					//	return
+					//}
+					//c.Println("Result:", result)
+
+					//err = convertToGoType(inputs, &r)
+					//if err != nil {
+					//	c.Println(err.Error())
+					//	return
+					//}
+
+					//constructorInputs, err := parseMethodArguments(c, contract.Abi, *functionName)
+					//if err != nil {
+					//	c.Printf("Error parsing constructor parameters: %s\n", err)
+					//	return
+					//}
+
+				} else {
+					c.Println(err.Error())
+				}
+
+				c.Println("===============================================================")
+			},
+		},
 		{
 			Name: "addClient",
 			Help: "use: \taddClient -name -uri \n\t\t\t\tdescription: Connects to an RPC client to be used",
@@ -732,4 +807,251 @@ func parseMethodArguments(c *ishell.Context, abiStruct *abi.ABI, methodName stri
 	}
 
 	return
+}
+
+//func convertToGoType(input interface{}, output interface{}) (interface{}, error) {
+//	outputType := reflect.TypeOf(output)
+//
+//	if !utils.HasExpectedArrayStructure(input, outputType) {
+//		return nil, errors.New("could not convert to go type: input has different type structure")
+//	}
+//
+//	fmt.Println("output type", outputType)
+//
+//	switch outputType.Kind() {
+//	case reflect.Slice, reflect.Array:
+//		if outputType.String() == "common.Address" {
+//			// If output kind is not array or slice, input type should be string or arraystructure check fails
+//			inputString, ok := input.(string)
+//			if !ok {
+//				return nil, errors.New("convertToGoType: error should not occur. input could not be asserted to type string")
+//			}
+//			result, err := utils.EvaluateGoTypeWithValue(inputString, outputType)
+//			if err != nil {
+//				return nil, err
+//			}
+//
+//			return result, nil
+//		}
+//
+//		inputItems := reflect.ValueOf(input)
+//		outputItems := reflect.ValueOf(output)
+//		outputItemsInterface := reflect.ValueOf(output).Interface()
+//
+//		for i := 0; i < inputItems.Len(); i++ {
+//			item, err := convertToGoType(inputItems.Index(i).Interface(), outputItems.Index(i).Interface())
+//			if err != nil {
+//				return nil, err
+//			}
+//
+//			fmt.Println("item", item)
+//			fmt.Println("item type", reflect.TypeOf(item))
+//
+//			fmt.Println("output items", outputItems)
+//			fmt.Println("output items interface", outputItemsInterface)
+//			fmt.Println("output items interface type", reflect.TypeOf(outputItemsInterface))
+//
+//			if outputType.Kind() == reflect.Slice {
+//				asserted, ok := outputItemsInterface.([]interface{})
+//				if !ok {
+//					return nil, errors.New("convertToGoType: type assertion error: failed to assert slice type to output variable")
+//				}
+//				outputItemsInterface = append(asserted, item)
+//
+//
+//			} else if outputType.Kind() == reflect.Array {
+//
+//			}
+//		}
+//
+//		break
+//	default:
+//		// If output kind is not array or slice, input type should be string or arraystructure check fails
+//		inputString, ok := input.(string)
+//		if !ok {
+//			return nil, errors.New("convertToGoType: error should not occur. input could not be asserted to type string")
+//		}
+//		result, err := utils.EvaluateGoTypeWithValue(inputString, outputType)
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		return result, nil
+//	}
+//
+//	return nil, errors.New("convertToGoType: unknown error: unable to convert")
+//}
+
+//func populateVariableType(input interface{}, output *interface{}) error {
+//	expectedType := reflect.TypeOf(output)
+//
+//	if !utils.HasExpectedArrayStructure(input, expectedType) {
+//		return errors.New("could not convert to go type: input has different type structure")
+//	}
+//
+//	switch reflect.TypeOf(*output).Kind() {
+//	case reflect.Slice, reflect.Array:
+//		inputItems := reflect.ValueOf(input)
+//		outputItems := reflect.ValueOf(*output)
+//		for i := 0; i < inputItems.Len(); i++ {
+//			item := convertToGoType(inputItems.Index(i).Interface(), outputItems.Index(i).Interface())
+//
+//		}
+//
+//		break
+//	default:
+//		fmt.Println("Input", input)
+//		fmt.Println("Input Type", reflect.TypeOf(input))
+//	}
+//
+//
+//	return nil
+//}
+
+func stringToArray(input string) (interface{}, error) {
+	if strings.Contains(input, ",") { // If is an array
+		superArray, err := utils.ConvertStringArray(input)
+		if err != nil {
+			return nil, err
+		}
+
+		return superArray, nil
+	}
+
+	return input, nil
+}
+
+func solidityToStaticGoType(input string, ty abi.Type) (interface{}, error) {
+	input = strings.ReplaceAll(input, "[", "{")
+	input = strings.ReplaceAll(input, "]", "}")
+
+	fmt.Println("New Input:", input)
+
+	goType := bindTypeGo(ty)
+
+	fmt.Println(fmt.Sprintf("Translated Solidity type to Go type: %s", goType))
+
+	var newType string
+
+	if strings.Contains(goType, "big.Int") {
+		if strings.Contains(goType, "[") {
+			newType = goType + "{}"
+		} else {
+			newType = "big.NewInt(0)"
+		}
+	} else if strings.Contains(goType, "byte") {
+		newType = goType + "{}"
+	} else if strings.Contains(goType, "int") {
+		if strings.Contains(goType, "[") {
+			newType = goType + "{}"
+		} else {
+			newType = goType + "(0)"
+		}
+	} else if strings.Contains(goType, "bool") {
+		if strings.Contains(goType, "[") {
+			newType = goType + "{}"
+		} else {
+			newType = goType + "(true)"
+		}
+	} else if strings.Contains(goType, "common.Address") {
+		newType = goType + "{}"
+	} else if strings.Contains(goType, "string") {
+		if strings.Contains(goType, "[") {
+			newType = goType + "{}"
+		} else {
+			return "", nil
+		}
+	}
+
+	expr, err := eval.ParseString(fmt.Sprintf("reflect.ValueOf(%s).Interface()", newType), "")
+	if err != nil {
+		return nil, err
+	}
+
+	a := eval.Args{
+		"reflect.ValueOf":     eval.MakeDataRegularInterface(reflect.ValueOf),
+		"reflect.Value":       eval.MakeTypeInterface(reflect.Value{}),
+		"big.Int":             eval.MakeTypeInterface(*big.NewInt(0)),
+		"big.NewInt":          eval.MakeDataRegularInterface(big.NewInt),
+		"common.Address":      eval.MakeTypeInterface(common.HexToAddress("")),
+		"common.HexToAddress": eval.MakeDataRegularInterface(common.HexToAddress),
+	}
+
+	r, err := expr.EvalToInterface(a)
+	if err != nil {
+		return nil, err
+	}
+
+	return r, nil
+}
+
+func bindTypeGo(kind abi.Type) string {
+	fmt.Println(fmt.Sprintf("Binding Type: %s", kind.String()))
+	fmt.Println(fmt.Sprintf("Binding Type.Type: %s", kind.Type))
+	fmt.Println(fmt.Sprintf("Binding Type.Elem: %s", kind.Elem))
+	stringKind := kind.String()
+	innerLen, innerMapping := bindUnnestedTypeGo(stringKind)
+	fmt.Println(fmt.Sprintf("InnerLen: %d", innerLen))
+	fmt.Println(fmt.Sprintf("InnerMapping: %s", innerMapping))
+
+	innerMapping, parts := wrapArray(stringKind, innerLen, innerMapping)
+
+	fmt.Println(fmt.Sprintf("InnerMapping: %s", innerMapping))
+	fmt.Println(fmt.Sprintf("Parts: %s", parts))
+
+	arrayBinding := arrayBindingGo(innerMapping, parts)
+	fmt.Println(fmt.Sprintf("Array Binding: %s", arrayBinding))
+
+	fmt.Println("")
+	return arrayBinding
+}
+
+func bindUnnestedTypeGo(stringKind string) (int, string) {
+	switch {
+	case strings.HasPrefix(stringKind, "address"):
+		return len("address"), "common.Address"
+
+	case strings.HasPrefix(stringKind, "bytes"):
+		parts := regexp.MustCompile(`bytes([0-9]*)`).FindStringSubmatch(stringKind)
+		return len(parts[0]), fmt.Sprintf("[%s]byte", parts[1])
+
+	case strings.HasPrefix(stringKind, "int") || strings.HasPrefix(stringKind, "uint"):
+		parts := regexp.MustCompile(`(u)?int([0-9]*)`).FindStringSubmatch(stringKind)
+		switch parts[2] {
+		case "8", "16", "32", "64":
+			return len(parts[0]), fmt.Sprintf("%sint%s", parts[1], parts[2])
+		}
+		return len(parts[0]), "*big.Int"
+
+	case strings.HasPrefix(stringKind, "bool"):
+		return len("bool"), "bool"
+
+	case strings.HasPrefix(stringKind, "string"):
+		return len("string"), "string"
+
+	default:
+		return len(stringKind), stringKind
+	}
+}
+
+func wrapArray(stringKind string, innerLen int, innerMapping string) (string, []string) {
+	remainder := stringKind[innerLen:]
+	//find all the sizes
+	matches := regexp.MustCompile(`\[(\d*)\]`).FindAllStringSubmatch(remainder, -1)
+	parts := make([]string, 0, len(matches))
+	for _, match := range matches {
+		//get group 1 from the regex match
+		parts = append(parts, match[1])
+	}
+	return innerMapping, parts
+}
+
+func arrayBindingGo(inner string, arraySizes []string) string {
+	out := ""
+	//prepend all array sizes, from outer (end arraySizes) to inner (start arraySizes)
+	for i := len(arraySizes) - 1; i >= 0; i-- {
+		out += "[" + arraySizes[i] + "]"
+	}
+	out += inner
+	return out
 }
