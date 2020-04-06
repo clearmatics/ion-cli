@@ -58,11 +58,3 @@ func (b *EthBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
 
 	return nil
 }
-
-
-
-// TODO if needed
-func (b EthBlockHeader) String() string{
-	//return fmt.Sprintf(hex.EncodeToString(b.Header.Extra))
-	return "ok"
-}

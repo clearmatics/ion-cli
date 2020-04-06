@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"github.com/spf13/cobra"
+	"strings"
 )
 
 var (
@@ -14,14 +15,29 @@ var (
 	//block *backend.BlockInterface
 	chain string
 
+	getBlkArgs = []string{"Block hash or number"}
 	getBlockCmd = &cobra.Command{
-		Use:   "getBlock",
+		Use:   "getBlock [" + strings.Join(getBlkArgs, ",") + "]",
 		Short: "Allow to retrieve a block through a rpc call",
 		Long:  `Allow to retrieve a block through a rpc call, either by number or by hash, rlp encoded or as object`,
+		Args: func(cmd *cobra.Command, args []string) error {
+			return checkArgs(args, getBlkArgs)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
+			blockInfo := args[0]
 
-			// TODO active profile might not exist
-			if !activeProfile.Chains.Exist(chain) {
+			//if !activeProfile.IsActive() {
+			//	arguments := make(map[string]string)
+			//	arguments["blockInfo"] = blockInfo
+			//	arguments["rlp"] =  fmt.Sprintf("%t", rlpEncoded)
+			//	arguments["byHash"] = fmt.Sprintf("%t", byHash)
+			//	//arguments["rpcURL"] =
+			//
+			//	runWithNoProfile(arguments)
+			//	return
+			//}
+
+			if !activeProfile.Chains.Exist(chain){
 				fmt.Println(fmt.Sprintf("The chain %v doesn't exists for profile %v", chain, activeProfile.Name))
 				return
 			}
@@ -40,7 +56,7 @@ var (
 
 			} else {
 				fmt.Printf("Request of retrieving on chain %v block by hash: %v\n", chain, blockInfo)
-
+				
 				err = activeChain.Block.Interface.GetByHash(activeProfile.Chains[chain].Network.Url, blockInfo)
 				returnIfError(err)
 			}
@@ -69,7 +85,6 @@ func init() {
 
 	getBlockCmd.Flags().BoolVarP(&rlpEncoded, "rlp", "", false, "Specify if the returned block header should be rlp encoded or not")
 	getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "", false, "Specify if reading the block by number or by hash")
-	getBlockCmd.Flags().StringVarP(&blockInfo, "block", "b", "latest", "Block number or hash")
 
 	// to override profile configs if active
 	getBlockCmd.Flags().StringVarP(&chain, "chain", "c", "local", "Chain identifier in the profile")
@@ -77,4 +92,26 @@ func init() {
 	rootCmd.AddCommand(getBlockCmd)
 
 }
+
+//func runWithNoProfile(args ...map[string]string) {
+//	if !byHash {
+//		fmt.Println(fmt.Sprintf("Request of retrieving on chain %v block by number: %v\n", chain, blockInfo))
+//
+//		err = activeChain.Block.Interface.GetByNumber(activeChain.Network.Url, blockInfo)
+//		returnIfError(err)
+//
+//	} else {
+//		fmt.Printf("Request of retrieving on chain %v block by hash: %v\n", chain, blockInfo)
+//
+//		err = activeChain.Block.Interface.GetByHash(activeProfile.Chains[chain].Network.Url, blockInfo)
+//		returnIfError(err)
+//	}
+//
+//
+//	if rlpEncoded {
+//		fmt.Println("Rlp encoding it..")
+//		err := activeChain.Block.Interface.RlpEncode()
+//		returnIfError(err)
+//	}
+//}
 

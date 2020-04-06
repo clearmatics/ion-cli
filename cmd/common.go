@@ -29,10 +29,16 @@ func loadConfig(configPath string) error {
 }
 
 func loadProfiles(profilesPath string) error {
-	profiles = backend.Profiles{}
-	b, _ := ioutil.ReadFile(profilesPath)
-	err := json.Unmarshal(b, &profiles)
+	jsonFile, err := os.Open(profilesPath)
+	if err != nil {
+		return err
+	}
+	defer jsonFile.Close()
 
+	profiles = backend.Profiles{}
+
+	b, _ := ioutil.ReadAll(jsonFile)
+	err = json.Unmarshal(b, &profiles)
 	return err
 }
 
@@ -52,9 +58,14 @@ func assignChainImplementers(chainType string) error {
 	case "clique":
 		activeProfile.Chains[chain].Block.Interface = &ethereum.CliqueBlockHeader{}
 		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}
+	case "ibft":
+		activeProfile.Chains[chain].Block.Interface = &ethereum.IBFTBlockHeader{}
+		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}
 	default:
 		return errors.New(fmt.Sprintf("The chain type %v is not recognised", blockType))
 	}
 
 	return nil
 }
+
+
