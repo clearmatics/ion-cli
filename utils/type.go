@@ -14,6 +14,13 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
+// SolidityToStaticGoType takes some input string that needs to be converted and an abi.Type that it should be converted to
+//
+// This function is designed to be used to convert inputs to type-safe variables to be used by abi.Pack() to construct
+// transaction payloads.
+//
+// It converts the input to an array format where necessary, then uses the converted input and the type to create a set
+// of initialisers in Go expressions that are then evaluated to produce statically typed variables which are returned
 func SolidityToStaticGoType(input string, ty abi.Type) (interface{}, error) {
 	convertedInput, err := ConvertStringArray(input)
 	if err != nil {
@@ -24,7 +31,6 @@ func SolidityToStaticGoType(input string, ty abi.Type) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	fmt.Println("Initialiser expression", initialiser)
 
 	expr, err := eval.ParseString(initialiser, "")
 	if err != nil {
@@ -74,12 +80,6 @@ func constructInitialiser(input interface{}, ty abi.Type) (string, error) {
 		if ty.Size > 0 && inputSlice.Len() != ty.Size {
 			return "", errors.New(fmt.Sprintf("constructInitialiser: input length mismatch: input has %d values but expected type has %d items", inputSlice.Len(), ty.Size))
 		}
-
-		fmt.Println("TY ELEM",ty.Elem)
-		fmt.Println("TY Type",ty.Type)
-		fmt.Println("TY Type.Kind",ty.Type.String())
-		fmt.Println("TY Kind",ty.Kind)
-		fmt.Println(inputSlice)
 
 		// Construct initialiser expression for each item in the slice
 		for i := 0; i < inputSlice.Len(); i++ {
