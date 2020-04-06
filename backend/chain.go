@@ -9,23 +9,19 @@ type Chain struct {
 	// cache
 	Block Block `json:"block"`
 	Transaction Transaction `json:"transaction"`
-
-	// ion proofs
-
-	// contract addresses
 }
 
-type Chains map[string]*Chain
+type Chains map[string]Chain
 
 // tells if a chain with id exists
 func (c Chains) Exist(id string) bool {
-	return c[id].Network != NetworkInfo{}
+	return c[id].Network.Url != ""
 }
 
 // add a chain object with id id
 // TODO enum checks on chainType
 func (c Chains) Add (id string, network NetworkInfo, chainType string) {
-	c[id] = &Chain{
+	c[id] = Chain{
 		Network:     network,
 		Accounts:    Accounts{},
 		Type:	chainType,

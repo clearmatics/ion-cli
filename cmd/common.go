@@ -12,8 +12,7 @@ import (
 	//"strings"
 )
 
-// utils for cli commands these functions will be available to all commands
-
+// utils for commands
 func returnIfError(err error) {
 	if err != nil {
 		fmt.Println(err)
@@ -56,11 +55,11 @@ func assignChainImplementers(chainObj *backend.Chain) error {
 		chainObj.Transaction.Interface = &ethereum.EthTransaction{}
 		chainObj.Block.Interface = &ethereum.EthBlockHeader{}
 	case "clique":
-		activeProfile.Chains[chain].Block.Interface = &ethereum.CliqueBlockHeader{}
-		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}
+		chainObj.Block.Interface = &ethereum.CliqueBlockHeader{}
+		chainObj.Transaction.Interface = &ethereum.EthTransaction{}
 	case "ibft":
-		activeProfile.Chains[chain].Block.Interface = &ethereum.IBFTBlockHeader{}
-		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}
+		chainObj.Block.Interface = &ethereum.IBFTBlockHeader{}
+		chainObj.Transaction.Interface = &ethereum.EthTransaction{}
 	default:
 		return errors.New(fmt.Sprintf("The chain type %v is not recognised", blockType))
 	}

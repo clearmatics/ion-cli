@@ -31,7 +31,7 @@ var (
 				fmt.Println("No profile in use..")
 
 				// run with no profile
-				activeChain = &backend.Chain{
+				activeChain = backend.Chain{
 					Network: backend.NetworkInfo{
 						Name:   "",
 						Url:    rpcURL,
@@ -51,7 +51,7 @@ var (
 			}
 
 			// assign the type implementing interfaces in the active chain
-			returnIfError(assignChainImplementers(activeChain))
+			returnIfError(assignChainImplementers(&activeChain))
 
 			// rpc call
 			if !byHash {

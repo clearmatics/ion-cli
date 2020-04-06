@@ -23,11 +23,14 @@ var(
 	configPath string
 	profilesPath string
 	profileName string
-	deleteFlag bool
+	rpcURL string
+	chainType string
+
 	forceFlag bool
 
 	// global variable to all commands
 	activeProfile backend.Profile
+	activeChain backend.Chain
 	profiles backend.Profiles
 
 	session backend.Session
