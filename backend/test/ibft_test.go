@@ -1,7 +1,9 @@
-package ibft
+package backend_test
 
 import (
+	"github.com/clearmatics/ion-cli/backend/ethereum"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 	"gotest.tools/assert"
@@ -32,15 +34,15 @@ var expectedEncodedProposalBlock = common.FromHex("0xf9026fa06893c6fe9270461992e
 var testBlockHash = common.FromHex("0xed607d816f792bff503fc01bf8903b50aae5bbc6d00293350e38bba92cde40ab")
 
 func Test_EncodeProposalBlock(t *testing.T) {
-	proposalBlock, err := encodeProposalBlock(&testBlock)
+	proposalBlock, err := ethereum.EncodeProposalBlock(&testBlock)
 	assert.NilError(t, err)
 
 	assert.DeepEqual(t, proposalBlock, expectedEncodedProposalBlock)
 	hash := crypto.Keccak256(proposalBlock)
 
-	t.Error(common.ToHex(hash))
+	t.Error(hexutil.Encode(hash))
 
-	istanbulExtra, err := ExtractIstanbulExtra(&testBlock)
+	istanbulExtra, err := ethereum.ExtractIstanbulExtra(&testBlock)
 	assert.NilError(t, err)
 
 	signer, err := ecrecover(proposalBlock, istanbulExtra.Seal)
