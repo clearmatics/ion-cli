@@ -21,6 +21,9 @@ clean:
 test:
 	@go test ./... -v -short
 
+testBackend:
+	@go test ./backend/test -v -short
+
 integration-test:
 	@go test ./... -v
 
