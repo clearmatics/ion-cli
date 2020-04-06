@@ -140,8 +140,6 @@ func constructInitialiser(input interface{}, ty abi.Type) (string, error) {
 				if err != nil {
 					return "", errors.New(fmt.Sprintf("constructInitialiser: %s", err.Error()))
 				}
-				fmt.Println("bytes:", bytes)
-				fmt.Println(ty.Size)
 
 				if ty.Size > 0 && ty.Size != len(bytes) {
 					return "", errors.New(fmt.Sprintf("constructInitialiser: incorrect byte array length error: expected length %d but input array has length %d", ty.Size, len(bytes)))
