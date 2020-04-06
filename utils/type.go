@@ -84,6 +84,8 @@ func constructInitialiser(input interface{}, ty abi.Type) (string, error) {
 		// Construct initialiser expression for each item in the slice
 		for i := 0; i < inputSlice.Len(); i++ {
 			var elementType abi.Type
+
+			// If the current type element is nil, it means that the input slice is a byte array of the form []uint8
 			if ty.Elem == nil {
 				if strings.Contains(ty.Type.String(), "[]uint8") {
 					elementType = abi.Type{
@@ -96,6 +98,8 @@ func constructInitialiser(input interface{}, ty abi.Type) (string, error) {
 						TupleElems:    nil,
 						TupleRawNames: nil,
 					}
+				} else {
+					return "", errors.New("constructInitialiser: type mismatch: input is slice but expected type has no elements")
 				}
 			} else {
 				elementType = *ty.Elem
