@@ -42,14 +42,14 @@ func (b *IBFTBlockHeader) Marshal() (header []byte, err error) {
 
 // calculate and assign the rlp form of the header
 func (b *IBFTBlockHeader) RlpEncode() (err error) {
-	bValidator, err := encodeCommitBlock(b.Header)
+	bValidator, err := EncodeCommitBlock(b.Header)
 	if err != nil {
 		return
 	}
 
 	b.ValidatorSignature = hex.EncodeToString(bValidator)
 
-	bProposer, err := encodeProposalBlock(b.Header)
+	bProposer, err := EncodeProposalBlock(b.Header)
 	if err != nil {
 		return
 	}
@@ -116,7 +116,7 @@ func (ist *IstanbulExtra) DecodeRLP(s *rlp.Stream) error {
 }
 
 // encodeProposalBlock returns the block signed by the block proposer of an IBFT chain
-func encodeProposalBlock(block *types.Header) ([]byte, error) {
+func EncodeProposalBlock(block *types.Header) ([]byte, error) {
 	// extract istanbul extraData from the block header
 	istanbul := block.Extra[IstanbulExtraVanity:]
 
@@ -141,7 +141,7 @@ func encodeProposalBlock(block *types.Header) ([]byte, error) {
 }
 
 // encodeCommitBlock returns the block signed by the validators of an IBFT chain
-func encodeCommitBlock(block *types.Header) ([]byte, error) {
+func EncodeCommitBlock(block *types.Header) ([]byte, error) {
 	// extract istanbul extraData from the block header
 	istanbul := block.Extra[IstanbulExtraVanity:]
 
