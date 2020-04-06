@@ -99,6 +99,7 @@ contract TypeTest {
     function Strings(string[] memory input) public {}
     function String2(string[2] memory input) public {}
     function String4(string[4] memory input) public {}
+    function String22(string[2][2] memory input) public {}
 
     function Bytes(bytes memory input) public {}
     function Bytes1(bytes1 input) public {}
@@ -112,20 +113,24 @@ contract TypeTest {
     function Byte8(byte[8] memory input) public {}
     function Byte64(byte[64] memory input) public {}
     function Byte128(byte[128] memory input) public {}
+    function Byte128128(byte[128][128] memory input) public {}
 
     function Bytes1n(bytes1[] memory input) public {}
     function Bytes2n(bytes2[] memory input) public {}
     function Bytes8n(bytes8[] memory input) public {}
     function Bytes32n(bytes32[] memory input) public {}
+    function Bytes32_22(bytes32[][] memory input) public {}
 
     function Bytes1_2(bytes1[2] memory input) public {}
     function Bytes2_2(bytes2[2] memory input) public {}
     function Bytes8_2(bytes8[2] memory input) public {}
     function Bytes32_2(bytes32[2] memory input) public {}
     function Bytes32_128(bytes32[128] memory input) public {}
+    function Bytes32_128128(bytes32[128][128] memory input) public {}
 
     function Bytes1_4(bytes1[4] memory input) public {}
     function Bytes2_4(bytes2[4] memory input) public {}
     function Bytes8_4(bytes8[4] memory input) public {}
     function Bytes32_4(bytes32[4] memory input) public {}
+    function Bytes32_4n(bytes32[4][] memory input) public {}
 }
