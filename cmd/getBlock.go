@@ -51,7 +51,7 @@ var (
 			}
 
 			// assign the type implementing interfaces in the active chain
-			returnIfError(assignChainImplementers(&activeChain))
+			returnIfError(activeChain.AssignImplementers())
 
 			// rpc call
 			if !byHash {

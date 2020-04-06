@@ -27,7 +27,7 @@ var (
 				fmt.Println("No profile in use..")
 
 				// run with no profile
-				activeChain = backend.Chain{
+				activeChain = backend.Chain {
 					Network: backend.NetworkInfo{
 						Name:   "",
 						Url:    rpcURL,
@@ -47,7 +47,7 @@ var (
 			}
 
 			// assign the type implementing the tx interface in the chain
-			returnIfError(assignChainImplementers(&activeChain))
+			returnIfError(activeChain.AssignImplementers())
 
 
 			fmt.Println("Retrieving and generating ION proof for tx:", txHash)
