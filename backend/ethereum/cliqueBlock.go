@@ -75,3 +75,6 @@ func (b *CliqueBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
 	return nil
 }
 
+func (b *CliqueBlockHeader) Print () {
+	fmt.Println("Block hash:", b.Header.Hash().Hex(), "\nRlp Signed:", b.RlpSignedEncoded, "\nRlp Unsigned:", b.RlpUnsignedEncoded)
+}

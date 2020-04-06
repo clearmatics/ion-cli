@@ -50,11 +50,11 @@ func checkArgs(args []string, expected []string) error {
 	return nil
 }
 
-func assignChainImplementers(chainType string) error {
-	switch chainType {
+func assignChainImplementers(chainObj *backend.Chain) error {
+	switch chainObj.Type {
 	case "eth":
-		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}
-		activeProfile.Chains[chain].Block.Interface = &ethereum.EthBlockHeader{}
+		chainObj.Transaction.Interface = &ethereum.EthTransaction{}
+		chainObj.Block.Interface = &ethereum.EthBlockHeader{}
 	case "clique":
 		activeProfile.Chains[chain].Block.Interface = &ethereum.CliqueBlockHeader{}
 		activeProfile.Chains[chain].Transaction.Interface = &ethereum.EthTransaction{}

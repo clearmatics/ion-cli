@@ -2,12 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/clearmatics/ion-cli/backend"
 	"github.com/spf13/cobra"
 	"strings"
 )
 
 var (
-	blockInfo  string
 	blockType  string
 	byHash     bool
 	rlpEncoded bool
@@ -26,41 +26,47 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			blockInfo := args[0]
 
-			//if !activeProfile.IsActive() {
-			//	arguments := make(map[string]string)
-			//	arguments["blockInfo"] = blockInfo
-			//	arguments["rlp"] =  fmt.Sprintf("%t", rlpEncoded)
-			//	arguments["byHash"] = fmt.Sprintf("%t", byHash)
-			//	//arguments["rpcURL"] =
-			//
-			//	runWithNoProfile(arguments)
-			//	return
-			//}
+			if !activeProfile.IsActive() {
 
-			if !activeProfile.Chains.Exist(chain){
-				fmt.Println(fmt.Sprintf("The chain %v doesn't exists for profile %v", chain, activeProfile.Name))
-				return
+				fmt.Println("No profile in use..")
+
+				// run with no profile
+				activeChain = &backend.Chain{
+					Network: backend.NetworkInfo{
+						Name:   "",
+						Url:    rpcURL,
+						Header: "",
+					},
+					Type:chainType,
+				}
+			} else {
+
+				if !activeProfile.Chains.Exist(chain){
+					fmt.Println(fmt.Sprintf("The chain %v doesn't exists for profile %v", chain, activeProfile.Name))
+					return
+				}
+
+				// use profile chain
+				activeChain = activeProfile.Chains[chain]
 			}
 
-			// assign the type implementing the block interface in the chain
-			returnIfError(assignChainImplementers(activeProfile.Chains[chain].Type))
-
-			activeChain := activeProfile.Chains[chain]
+			// assign the type implementing interfaces in the active chain
+			returnIfError(assignChainImplementers(activeChain))
 
 			// rpc call
 			if !byHash {
 				fmt.Println(fmt.Sprintf("Request of retrieving on chain %v block by number: %v\n", chain, blockInfo))
+				fmt.Println(rpcURL)
 
 				err = activeChain.Block.Interface.GetByNumber(activeChain.Network.Url, blockInfo)
 				returnIfError(err)
 
 			} else {
 				fmt.Printf("Request of retrieving on chain %v block by hash: %v\n", chain, blockInfo)
-				
+
 				err = activeChain.Block.Interface.GetByHash(activeProfile.Chains[chain].Network.Url, blockInfo)
 				returnIfError(err)
 			}
-
 
 			if rlpEncoded {
 				fmt.Println("Rlp encoding it..")
@@ -68,50 +74,35 @@ var (
 				returnIfError(err)
 			}
 
-			// marshal the typed header into json raw format that will be saved to file
-			activeChain.Block.Header, err = activeChain.Block.Interface.Marshal()
+			if activeProfile.IsActive() {
+				// marshal the typed header into json raw format that will be saved to file
+				activeChain.Block.Header, err = activeChain.Block.Interface.Marshal()
+				returnIfError(err)
 
-			returnIfError(err)
+				// update profile chain
+				activeProfile.Chains[chain] = activeChain
+				returnIfError(profiles.Save(profilesPath))
 
-			activeProfile.Chains[chain] = activeChain
+			} else {
+				// just print the block retrieved
+				activeChain.Block.Interface.Print()
+			}
 
-			// persist the updates on the active profile
-			returnIfError(profiles.Save(profilesPath))
 		},
 	}
 )
 
 func init() {
 
-	getBlockCmd.Flags().BoolVarP(&rlpEncoded, "rlp", "", false, "Specify if the returned block header should be rlp encoded or not")
-	getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "", false, "Specify if reading the block by number or by hash")
-
-	// to override profile configs if active
+	getBlockCmd.Flags().BoolVarP(&rlpEncoded, "rlp", "", false, "Rlp encode the block header as well (default false)")
+	getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "", false, "Specify if reading the block by hash (default by number)")
 	getBlockCmd.Flags().StringVarP(&chain, "chain", "c", "local", "Chain identifier in the profile")
+	getBlockCmd.Flags().StringVarP(&chainType, "type", "", "eth", "Chain structure type")
+
+	// to run with no profiles
+	getBlockCmd.Flags().StringVarP(&rpcURL, "rpc", "", "http://127.0.0.1:8545", "URL of the rpc endpoint")
 
 	rootCmd.AddCommand(getBlockCmd)
 
 }
-
-//func runWithNoProfile(args ...map[string]string) {
-//	if !byHash {
-//		fmt.Println(fmt.Sprintf("Request of retrieving on chain %v block by number: %v\n", chain, blockInfo))
-//
-//		err = activeChain.Block.Interface.GetByNumber(activeChain.Network.Url, blockInfo)
-//		returnIfError(err)
-//
-//	} else {
-//		fmt.Printf("Request of retrieving on chain %v block by hash: %v\n", chain, blockInfo)
-//
-//		err = activeChain.Block.Interface.GetByHash(activeProfile.Chains[chain].Network.Url, blockInfo)
-//		returnIfError(err)
-//	}
-//
-//
-//	if rlpEncoded {
-//		fmt.Println("Rlp encoding it..")
-//		err := activeChain.Block.Interface.RlpEncode()
-//		returnIfError(err)
-//	}
-//}
 

@@ -3,6 +3,7 @@ package ethereum
 import (
 	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"github.com/clearmatics/ion-cli/utils"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -39,5 +40,10 @@ func (tx *EthTransaction) GenerateIonProof(rpcURL string, hash string) error {
 
 func (tx *EthTransaction) Marshal() ([]byte, error) {
 	return json.Marshal(tx)
+}
+
+func (tx *EthTransaction) Print() {
+	fmt.Println("Tx hash:", tx.Tx.Hash().String(), "\nION proof:", tx.Proof)
+
 }
 

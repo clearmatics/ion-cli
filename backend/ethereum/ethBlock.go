@@ -58,3 +58,7 @@ func (b *EthBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
 
 	return nil
 }
+
+func (b *EthBlockHeader) Print () {
+	fmt.Println("Block hash:", b.Header.Hash().Hex(), "\nRlp Encoded:", b.RlpEncoded)
+}

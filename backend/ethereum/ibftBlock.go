@@ -87,6 +87,34 @@ func (b *IBFTBlockHeader) GetByHash(rpcURL string, hash string) (err error) {
 	return nil
 }
 
+func (b *IBFTBlockHeader) Print () {
+	fmt.Println("Block hash:", b.Header.Hash().Hex())
+
+}
+
+// EncodeRLP serializes ist into the Ethereum RLP format.
+func (ist *IstanbulExtra) EncodeRLP(w io.Writer) error {
+	return rlp.Encode(w, []interface{}{
+		ist.Validators,
+		ist.Seal,
+		ist.CommittedSeal,
+	})
+}
+
+// DecodeRLP implements rlp.Decoder, and load the istanbul fields from a RLP stream.
+func (ist *IstanbulExtra) DecodeRLP(s *rlp.Stream) error {
+	var istanbulExtra struct {
+		Validators    []common.Address
+		Seal          []byte
+		CommittedSeal [][]byte
+	}
+	if err := s.Decode(&istanbulExtra); err != nil {
+		return err
+	}
+	ist.Validators, ist.Seal, ist.CommittedSeal = istanbulExtra.Validators, istanbulExtra.Seal, istanbulExtra.CommittedSeal
+	return nil
+}
+
 // encodeProposalBlock returns the block signed by the block proposer of an IBFT chain
 func encodeProposalBlock(block *types.Header) ([]byte, error) {
 	// extract istanbul extraData from the block header
@@ -137,28 +165,6 @@ func encodeCommitBlock(block *types.Header) ([]byte, error) {
 	return rlp.EncodeToBytes(&block)
 }
 
-// EncodeRLP serializes ist into the Ethereum RLP format.
-func (ist *IstanbulExtra) EncodeRLP(w io.Writer) error {
-	return rlp.Encode(w, []interface{}{
-		ist.Validators,
-		ist.Seal,
-		ist.CommittedSeal,
-	})
-}
-
-// DecodeRLP implements rlp.Decoder, and load the istanbul fields from a RLP stream.
-func (ist *IstanbulExtra) DecodeRLP(s *rlp.Stream) error {
-	var istanbulExtra struct {
-		Validators    []common.Address
-		Seal          []byte
-		CommittedSeal [][]byte
-	}
-	if err := s.Decode(&istanbulExtra); err != nil {
-		return err
-	}
-	ist.Validators, ist.Seal, ist.CommittedSeal = istanbulExtra.Validators, istanbulExtra.Seal, istanbulExtra.CommittedSeal
-	return nil
-}
 
 // ExtractIstanbulExtra extracts all values of the IstanbulExtra from the header. It returns an
 // error if the length of the given extra-data is less than 32 bytes or the extra-data can not

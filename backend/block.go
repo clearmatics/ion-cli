@@ -2,6 +2,7 @@ package backend
 
 import (
 	"encoding/json"
+	//"github.com/clearmatics/ion-cli/backend/ethereum"
 )
 
 type Block struct {
@@ -16,4 +17,5 @@ type BlockInterface interface {
 	GetByNumber(rpcURL string, number string) (err error)
 	GetByHash(rpcURL string, hash string) (err error)
 	Marshal() (header []byte, err error)
+	Print()
 }
