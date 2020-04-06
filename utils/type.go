@@ -101,7 +101,6 @@ func constructInitialiser(input interface{}, ty abi.Type) (string, error) {
 				elementType = *ty.Elem
 			}
 
-
 			elementInitialiser, err := constructInitialiser(inputSlice.Index(i).Interface(), elementType)
 			if err != nil {
 				return "", err
