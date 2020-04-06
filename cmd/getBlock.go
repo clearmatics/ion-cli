@@ -56,7 +56,6 @@ var (
 			// rpc call
 			if !byHash {
 				fmt.Println(fmt.Sprintf("Request of retrieving on chain %v block by number: %v\n", chain, blockInfo))
-				fmt.Println(rpcURL)
 
 				err = activeChain.Block.Interface.GetByNumber(activeChain.Network.Url, blockInfo)
 				returnIfError(err)
