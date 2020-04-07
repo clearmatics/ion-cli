@@ -2,3 +2,4 @@
 
 ion-cli
 .idea
+./cmd_test/*.json
