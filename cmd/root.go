@@ -69,6 +69,7 @@ func Execute() {
 }
 
 func init(){
+	// TODO allow for set default values of paths
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "", "./config/config-test.json", "Configs file path")

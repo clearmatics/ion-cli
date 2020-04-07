@@ -67,6 +67,18 @@ func initProfile() error {
 
 	return nil
 }
+func CleanJSONFile(path string) (error) {
+	file, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	_, err = file.Write([]byte("{}"))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func checkArgs(args []string, expected []string) error {
 	if len(args) != len(expected) {

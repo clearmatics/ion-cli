@@ -34,16 +34,22 @@ var (
 
 			if profiles.Exist(profileId) {
 
-				if profiles[profileId].Chains.Exist(chainId) || forceFlag {
+				if !profiles[profileId].Chains.Exist(chainId) || forceFlag {
 					fmt.Println(fmt.Sprintf("Creating chain %v in profile %v", chainId, profileId))
 					returnIfError(loadConfig(configPath))
 
-					network := backend.NetworkInfo{}
-					returnIfError(configs.UnmarshalKey("networks." + networkId, &network))
+					if configs.IsSet("networks." + networkId) {
+						network := backend.NetworkInfo{}
+						returnIfError(configs.UnmarshalKey("networks." + networkId, &network))
+						profiles[profileId].Chains.Add(chainId, network, chainType)
 
-					profiles[profileId].Chains.Add(chainId, network, chainType)
+					} else {
+						fmt.Println(
+							fmt.Sprintf("The network with id %s is not present in your configs!", networkId))
+					}
 				} else {
-					fmt.Println(fmt.Sprintf("Chain with id %v already exists! Use flag -f to overwrite it", chainId))
+					fmt.Println(
+						fmt.Sprintf("Chain with id %v already exists! Use flag -f to overwrite it", chainId))
 				}
 
 			} else {
