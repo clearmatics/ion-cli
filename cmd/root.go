@@ -1,15 +1,12 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/clearmatics/ion-cli/backend"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/viper"
-	"io/ioutil"
 	"os"
-	"time"
 )
 
 // TODO add log with verbosity level
@@ -25,10 +22,9 @@ var(
 	profileName string
 	rpcURL string
 	chainType string
-
 	forceFlag bool
 
-	// global variable to all commands
+
 	activeProfile backend.Profile
 	activeChain backend.Chain
 	profiles backend.Profiles
@@ -73,7 +69,6 @@ func Execute() {
 }
 
 func init(){
-
 	// flags
 	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 	rootCmd.PersistentFlags().StringVarP(&configPath, "config", "", "./config/config-test.json", "Configs file path")
@@ -87,35 +82,12 @@ func init(){
 
 	rootCmd.PersistentFlags().BoolVarP(&forceFlag, "force", "f", false, "Overwrites objects that already exist")
 
-	// choose profile to use
-	initProfile()
-
 	return
 }
 
-func initProfile() {
-
-	returnIfError(loadProfiles(profilesPath))
-
-	// if profile flag is set use that if it's a valid profile
-	if profiles.Exist(profileName){
-		fmt.Println("Using profile", profileName, "from the flag")
-
-		activeProfile = profiles[profileName]
-	} else {
-		// check if a session is active
-		b, _ := ioutil.ReadFile(sessionPath)
-		returnIfError(json.Unmarshal(b, &session))
-
-		if session.IsValid(timeoutSec) && profiles.Exist(session.Profile) {
-			fmt.Println("Loading profile", session.Profile, "from the session")
-
-			session.LastAccess = int(time.Now().Unix())
-			session.Save(sessionPath)
-
-			activeProfile = profiles[session.Profile]
-		}
-	}
+func NewRootCmd() *cobra.Command {
+	// internally calls also the init function of the command
+	return rootCmd
 }
 
 

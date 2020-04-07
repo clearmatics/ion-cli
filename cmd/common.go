@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"os"
+	"time"
+
 	//"strings"
 )
 
@@ -38,6 +40,32 @@ func loadProfiles(profilesPath string) error {
 	b, _ := ioutil.ReadAll(jsonFile)
 	err = json.Unmarshal(b, &profiles)
 	return err
+}
+
+func initProfile() error {
+	returnIfError(loadProfiles(profilesPath))
+
+	// if profile flag is set use that if it's a valid profile
+	if profiles.Exist(profileName){
+		fmt.Println("Using profile", profileName, "from the flag")
+
+		activeProfile = profiles[profileName]
+	} else {
+		// check if a session is active
+		b, _ := ioutil.ReadFile(sessionPath)
+		returnIfError(json.Unmarshal(b, &session))
+
+		if session.IsValid(timeoutSec) && profiles.Exist(session.Profile) {
+			fmt.Println("Loading profile", session.Profile, "from the session")
+
+			session.LastAccess = int(time.Now().Unix())
+			session.Save(sessionPath)
+
+			activeProfile = profiles[session.Profile]
+		}
+	}
+
+	return nil
 }
 
 func checkArgs(args []string, expected []string) error {

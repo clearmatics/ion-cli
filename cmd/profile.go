@@ -67,4 +67,10 @@ func init() {
 	rootCmd.AddCommand(profileCmd)
 }
 
+func NewProfileCmd() *cobra.Command {
+	// internally calls also the init function of the command
+	return profileCmd
+}
+
+
 

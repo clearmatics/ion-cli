@@ -16,6 +16,9 @@ var (
 		Short: "Retrieve a transaction object by its hash and assign to it the ION proof",
 		Long: `Perform a eth_getTransactionByHash rpc call and cache the tx object.
 		Calculate the merkle proof of that tx if the --getProof flag is passed`,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return initProfile()
+		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			return checkArgs(args, getTxArgs)
 		},

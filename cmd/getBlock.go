@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	blockType  string
 	byHash     bool
 	rlpEncoded bool
 	err error
@@ -20,6 +19,9 @@ var (
 		Use:   "getBlock [" + strings.Join(getBlkArgs, ",") + "]",
 		Short: "Allow to retrieve a block through a rpc call",
 		Long:  `Allow to retrieve a block through a rpc call, either by number or by hash, rlp encoded or as object`,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			return initProfile()
+		},
 		Args: func(cmd *cobra.Command, args []string) error {
 			return checkArgs(args, getBlkArgs)
 		},
@@ -92,7 +94,6 @@ var (
 )
 
 func init() {
-
 	getBlockCmd.Flags().BoolVarP(&rlpEncoded, "rlp", "", false, "Rlp encode the block header as well (default false)")
 	getBlockCmd.Flags().BoolVarP(&byHash, "byHash", "", false, "Specify if reading the block by hash (default by number)")
 	getBlockCmd.Flags().StringVarP(&chain, "chain", "c", "local", "Chain identifier in the profile")
@@ -102,6 +103,12 @@ func init() {
 	getBlockCmd.Flags().StringVarP(&rpcURL, "rpc", "", "http://127.0.0.1:8545", "URL of the rpc endpoint")
 
 	rootCmd.AddCommand(getBlockCmd)
-
 }
+
+func NewGetBlockCmd() *cobra.Command {
+	// internally calls also the init function of the command
+	return getBlockCmd
+}
+
+
 
